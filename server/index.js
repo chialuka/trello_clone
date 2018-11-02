@@ -54,7 +54,7 @@ const resolvers = {
 
   List: {
     card: async (_, {id}) => {
-     return (await Card.find({_id: id}));
+     return (await Card.find({_id: id}).map(x => x.id === id));
     }
   },
 
