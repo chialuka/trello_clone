@@ -5,13 +5,16 @@ mongoose.connect("mongodb://localhost/test2", { useNewUrlParser: true });
 
 const List = mongoose.model("List", {
   name: String,
+  card: [{
+    listId: String,
+  }]
 });
 
 const Card = mongoose.model("Card", {
   title: String,
   description: String,
   comment: String,
-  list: String,
+  listId: String,
 });
 
 const typeDefs = `
@@ -53,13 +56,16 @@ const resolvers = {
   },
 
   List: {
-    card: async (_, {id}) => {
-     return (await Card.find({_id: id}).map(x => x.id === id));
+    card: async ({id}) => {
+      //console.log(id)
+      //const li = id.toString();
+      return (await Card.find({listId: id}));
     }
   },
 
   Card: {
-    list: async (_, {listId}) => {
+    list: async ({listId}) => {
+      //console.log(listId)
       return (await List.findOne({_id: listId}));
     }
   },
@@ -83,12 +89,12 @@ const resolvers = {
     createCard: async (_, { title, description, comment, listId }) => {
       const card = new Card({ title, description, comment , listId });
       await card.save();
-      await List.findOneAndUpdate({_id: listId});
+      //await List.findOneAndUpdate({_id: listId});
       return card;
     },
     updateCard: async (_, { id, title, description, comment, listId }) => {
       await Card.findOneAndUpdate({_id: id}, { title, description, comment, listId });
-      await List.findOneAndUpdate({_id: listId});
+      //await List.findOneAndUpdate({_id: listId});
       const card = Card.findOne({_id: id});
       return card;
     },
