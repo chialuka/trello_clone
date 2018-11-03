@@ -24,15 +24,15 @@ const typeDefs = `
   }
 
   type List {
-    id: ID
-    name: String
+    id: ID!
+    name: String!
     card: [Card]
   }
 
   type Card {
-    id: ID
-    listId: String
-    title: String
+    id: ID!
+    listId: String!
+    title: String!
     description: String
     comment: String
     list: List
@@ -40,12 +40,12 @@ const typeDefs = `
 
   type Mutation {
     createList(name: String): List!
-    updateList(id: ID name: String): List!
-    deleteList(id: ID): Boolean!
+    updateList(id: ID! name: String!): List!
+    deleteList(id: ID!): Boolean!
 
-    createCard(title: String, listId: String description: String, comment: String): Card!
-    updateCard(id: ID, listId: String title: String, description: String, comment: String): Card!
-    deleteCard(id: ID): Boolean!
+    createCard(title: String listId: String description: String, comment: String): Card!
+    updateCard(id: ID! listId: String title: String, description: String, comment: String): Card!
+    deleteCard(id: ID!): Boolean!
   }
 `;
 
