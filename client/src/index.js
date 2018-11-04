@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from 'react-apollo';
 import * as serviceWorker from './serviceWorker';
-import App from './App.js'
+import App from './App.js';
 
 
 const client = new ApolloClient({
