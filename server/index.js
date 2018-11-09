@@ -44,7 +44,7 @@ const typeDefs = `
     deleteList(id: ID!): Boolean!
 
     createCard(title: String listId: String description: String, comment: String): Card!
-    updateCard(id: ID! listId: String title: String, description: String, comment: String): Card!
+    updateCard(id: ID! listId: String! title: String, description: String, comment: String): Card!
     deleteCard(id: ID!): Boolean!
   }
 `;

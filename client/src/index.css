@@ -25,19 +25,20 @@ body {
 }
 
 .item {
-  padding: 0px;
+  padding: 1px;
   box-shadow: 0 1px 0 rgba(9,45,66,.25);
   max-width: 300px;
   min-width: 280px;
-  min-height: 20px;
-  overflow-y: auto;
+  min-height: 10px;
+  max-height: 40px;
+  overflow-y: hidden;
   overflow-x: hidden;
 }
 
 .title {
   cursor: pointer;
   background-color: white;
-  padding: 8px;
+  padding: 0px;
   border-radius: 3px;
 }
 
@@ -53,4 +54,28 @@ body {
 .comment {
   padding: 10px;
   margin: 10px;
+}
+
+.icons {
+  /* display: flex;
+  justify-content: right; */
+ margin-left: 120px;
+ right: auto;
+ /* display: none; */
+ opacity: 0.01;
+}
+
+.icons:hover {
+  /* display: inline-block; */
+  opacity: 1;
+}
+
+.icon{
+ transform: scale(0.7);
+}
+
+.cardTitle {
+  display: inline-block;
+  font-size: 15px;
+  padding: 0 0 5px 5px;
 }
