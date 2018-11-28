@@ -57,16 +57,12 @@ body {
 }
 
 .icons {
-  /* display: flex;
-  justify-content: right; */
- margin-left: 120px;
+ margin-left: 30px;
  right: auto;
- /* display: none; */
  opacity: 0.01;
 }
 
 .icons:hover {
-  /* display: inline-block; */
   opacity: 1;
 }
 

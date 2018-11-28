@@ -16,8 +16,6 @@ const ListsQuery = gql`
       id
       listId
       title
-      description
-      comment
     }
   }
 }
@@ -27,10 +25,19 @@ const CardsQuery = gql`
 {
   cards{
     id
+    id2
     listId
     title
-    description
-    comment
+    descriptions {
+      description
+      id
+      cardId
+    }
+    comments {
+      comment
+      id
+      cardId
+    }
     list {
       id
       name
@@ -64,23 +71,18 @@ mutation($id: ID!){
 `;
 
 const createCardMutation = gql`
-mutation($title: String!, $listId: String!, $description: String, $comment: String){
-  createCard(title: $title, listId: $listId, description: $description, comment: $comment){
+mutation($title: String!, $listId: String!, $id2: Int!){
+  createCard(title: $title, listId: $listId, id2: $id2){
     title
     id
     listId
-    description
-    comment
-    list {
-      name
-    }
   }
 }
 `;
 
 const updateCardMutation = gql`
-mutation($title: String!, $listId: String!, $description: String, $comment: String, $id: ID!){
-  updateCard(title: $title, listId: $listId, description: $description, comment: $comment, id: $id){
+mutation($title: String!, $listId: String!, $id: ID!){
+  updateCard(title: $title, listId: $listId, id: $id){
 		id
     title
     description
@@ -95,11 +97,70 @@ mutation($id: ID!){
 }
 `;
 
+const createCommentMutation = gql`
+mutation($comment: String!, $cardId: String!){
+  createComment(comment: $comment, cardId: $cardId){
+    comment
+    id
+    cardId
+  }
+}
+`;
+
+const updateCommentMutation = gql`
+mutation($comment: String!, $cardId: String!, $id: ID!){
+  updateComment(comment: $comment, cardId: $cardId, id: $id){
+    comment
+    id
+    cardId
+  }
+}
+`;
+
+
+const deleteCommentMutation = gql`
+mutation($id: ID!){
+  deleteComment(id: $id)
+}
+`;
+
+
+const createDescriptionMutation = gql`
+mutation($description: String!, $cardId: String!){
+  createDescription(description: $description, cardId: $cardId){
+    description
+    id
+    cardId
+  }
+}
+`;
+
+
+const updateDescriptionMutation = gql`
+mutation($description: String!, $cardId: String!, $id: ID!){
+  updateDescription(description: $description, cardId: $cardId, id: $id){
+    description
+    id
+    cardId
+  }
+}
+`;
+
+
+const deleteDescriptionMutation = gql`
+mutation($id: ID!){
+  deleteDescription(id: $id)
+}
+`;
+
+
 class App extends Component {
   state = {
     modal: false,
-    id: '',
+    cardId: '',
     listId: '',
+    commentId: '',
+    descriptionId: '',
     title: '',
     comment: "",
     description: "",
@@ -107,7 +168,7 @@ class App extends Component {
 
   toggle = (id, listId, title) => {
     this.setState({
-      modal: !this.state.modal, id: id, listId: listId, title: title
+      modal: !this.state.modal, cardId: id, listId: listId, title: title
     });
   }
 
@@ -115,20 +176,17 @@ class App extends Component {
     this.setState({ [e.target.name]: e.target.value })
   }
 
-  updateCard = async (comment, openId, listId, title, description) => {
+  updateCard = async (openId, listId, title) => {
     await this.props.updateCard({
       variables: {
         id: openId,
         listId: listId,
-        comment: comment,
         title: title,
-        description: description,
       }
     })
   }
 
   deleteCard = async card => {
-    console.log(card)
     await this.props.deleteCard({
       variables: {
         id: card.key
@@ -136,23 +194,103 @@ class App extends Component {
     })
   }
 
+
+  editFunction = (element) => {
+    if (element.comment === undefined) {
+      this.setState({ description: element.description, descriptionId: element.id })
+    } else {
+      this.setState({ comment: element.comment, commentId: element.id })
+    }
+  }
+
+  submitComment = (comment, cardId, commentId) => {
+    if (commentId === '') {
+      this.createComment(comment, cardId)
+    } else {
+      this.updateComment(comment, cardId, commentId)
+    }
+    this.setState({ commentId: '', comment: '' })
+  }
+
+  submitDescription = (description, cardId, descriptionId) => {
+    if (descriptionId === '') {
+      this.createDescription(description, cardId)
+    } else {
+      this.updateDescription(description, cardId, descriptionId);
+    }
+    this.setState({ description: '', descriptionId: '' })
+  }
+
+  createComment = async (comment, cardId) => {
+    await this.props.createComment({
+      variables: {
+        comment: comment,
+        cardId: cardId
+      }
+    })
+  }
+
+  updateComment = async (comment, cardId, commentId) => {
+    await this.props.updateComment({
+      variables: {
+        comment: comment,
+        cardId: cardId,
+        id: commentId
+      }
+    })
+  }
+
+  deleteComment = async element => {
+    await this.props.deleteComment({
+      variables: {
+        id: element.id
+      }
+    })
+  }
+
+  createDescription = async (description, cardId) => {
+    await this.props.createDescription({
+      variables: {
+        description: description,
+        cardId: cardId
+      }
+    })
+  }
+
+  updateDescription = async (description, cardId, descriptionId) => {
+    await this.props.updateDescription({
+      variables: {
+        description: description,
+        cardId: cardId,
+        id: descriptionId
+      }
+    })
+  }
+
+  deleteDescription = async element => {
+    await this.props.deleteDescription({
+      variables: {
+        id: element.id
+      }
+    })
+  }
+
+
   render() {
-    const openId = this.state.id;
-    const listId = this.state.listId;
-    const title = this.state.title;
-    //console.log(this.state.title, this.state.listId);
+    const cardId = this.state.cardId;
+    const commentId = this.state.commentId;
+    const descriptionId = this.state.descriptionId;
     const comment = this.state.comment;
     const description = this.state.description;
     const { list: { loading, lists } } = this.props;
     const { card: { cards } } = this.props;
-    console.log(cards)
     if (loading) return null;
     return (
-      <div className="page">{lists.map(list =>
+      <div className="page">{lists.map(list => list.card.length !== 0 ? list =
         <div key={list.name} className="list">
           {list.name}
           {cards.map(card => card.listId === list.id ? card =
-            <div key={card.id} id={card.id} className='item'>
+            <div key={card.id2} className='item'>
               <p className="title">
                 <span className='cardTitle'
                   onClick={this.toggle.bind(this, card.id, card.listId, card.title)}>
@@ -167,14 +305,22 @@ class App extends Component {
                 isOpen={this.state.modal}
                 toggle={this.toggle}
               >
-                {cards.map(ca => ca.id === openId ? ca =
+                {cards.map(card => card.id === cardId ? card =
                   <div>
-                    <ModalHeader toggle={this.toggle} key={UUID()} id={UUID()}>{ca.title}
-                      <p> in List: {ca.list.name}</p>
+                    <ModalHeader toggle={this.toggle} key={card.id} id={UUID()}>{card.title}
+                      <p> in List: {card.list.name}</p>
                     </ModalHeader>
                     <ModalBody>
                       <div className="description">Description:
-                        <li>{ca.description}</li>
+                        {card.descriptions.map(element =>
+                          <li key={element.id}
+                            onClick={() => this.editFunction(element)}>
+                            {element.description}
+                            <span className='icons'>
+                              <IconButton className='icon' onClick={() => this.deleteDescription(element)}><DeleteOutlineIcon /></IconButton>
+                            </span>
+                          </li>
+                        )}
                         <Form>
                           <FormGroup>
                             <Input
@@ -185,11 +331,19 @@ class App extends Component {
                               value={description} />
                           </FormGroup>
                           <Button size="sm"
-                            onClick={() => this.updateCard(comment, openId, listId, title, description)}>Save</Button>
+                            onClick={() => this.submitDescription(description, cardId, descriptionId)}>Save</Button>
                         </Form>
                       </div>
                       <div className="comment">Comments:
-                        <li>{ca.comment}</li>
+                        {card.comments.map(element =>
+                          <li key={element.id}
+                            onClick={() => this.editFunction(element)}>
+                            {element.comment}
+                            <span className='icons'>
+                              <IconButton className='icon' onClick={() => this.deleteComment(element)}><DeleteOutlineIcon /></IconButton>
+                            </span>
+                          </li>
+                        )}
                         <Form>
                           <FormGroup>
                             <Input
@@ -200,7 +354,7 @@ class App extends Component {
                               value={comment} />
                           </FormGroup>
                           <Button size="sm"
-                            onClick={() => this.updateCard(comment, openId, listId, title, description)}>Save</Button>
+                            onClick={() => this.submitComment(comment, cardId, commentId)}>Save</Button>
                         </Form>
                       </div>
                     </ModalBody>
@@ -208,7 +362,7 @@ class App extends Component {
                   : null)}
               </Modal>
             </div> : null)}
-        </div>)}
+        </div> : false)}
       </div>
     )
   }
@@ -222,4 +376,10 @@ export default compose(
   graphql(deleteListMutation, { name: "deleteList" }),
   graphql(createCardMutation, { name: "createCard" }),
   graphql(updateCardMutation, { name: "updateCard" }),
-  graphql(deleteCardMutation, { name: "deleteCard" }))(App)
+  graphql(deleteCardMutation, { name: "deleteCard" }),
+  graphql(createCommentMutation, { name: "createComment" }),
+  graphql(updateCommentMutation, { name: "updateComment" }),
+  graphql(deleteCommentMutation, { name: "deleteComment" }),
+  graphql(createDescriptionMutation, { name: "createDescription" }),
+  graphql(updateDescriptionMutation, { name: "updateDescription" }),
+  graphql(deleteDescriptionMutation, { name: "deleteDescription" }))(App)

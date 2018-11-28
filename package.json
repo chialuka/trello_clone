@@ -1,0 +1,22 @@
+{
+  "name": "trello_clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukasChiama/trello_clone.git"
+  },
+  "author": "Chukwualuka Chiama",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LukasChiama/trello_clone/issues"
+  },
+  "homepage": "https://github.com/LukasChiama/trello_clone#readme",
+  "dependencies": {
+    "concurrently": "^4.1.0"
+  }
+}
