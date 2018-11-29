@@ -13,7 +13,6 @@ const List = mongoose.model("List", {
 const Card = mongoose.model("Card", {
   title: String,
   listId: String,
-  id2: Number,
   comments: [{
     comment: String,
   }],
@@ -48,7 +47,6 @@ const typeDefs = `
 
   type Card {
     id: ID!
-    id2: Int!
     listId: String!
     title: String!
     descriptions: [Description]
@@ -69,11 +67,11 @@ const typeDefs = `
   }
 
   type Mutation {
-    createList(name: String): List!
+    createList(name: String!): List!
     updateList(id: ID! name: String!): List!
     deleteList(id: ID!): Boolean!
 
-    createCard(title: String! listId: String! id2: Int!): Card!
+    createCard(title: String! listId: String): Card!
     updateCard(id: ID! listId: String! title: String!): Card!
     deleteCard(id: ID!): Boolean!
 
@@ -133,8 +131,8 @@ const resolvers = {
     },
 
 
-    createCard: async (_, { title, listId, id2 }) => {
-      const card = new Card({ title, listId, id2 });
+    createCard: async (_, { title, listId }) => {
+      const card = new Card({ title, listId });
       await card.save();
       return card;
     },
