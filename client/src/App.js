@@ -7,6 +7,11 @@ import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { fab } from '@fortawesome/free-brands-svg-icons';
+import { faHome, faSearch, faPlus, faInfoCircle, faBell } from '@fortawesome/free-solid-svg-icons'
+
 
 const ListsQuery = gql`
 {
@@ -185,6 +190,7 @@ class App extends Component {
     description: "",
     cardTitle: "",
     listName: "",
+    dragging: undefined,
   }
 
   toggle = (id, listId, title) => {
@@ -257,7 +263,7 @@ class App extends Component {
         store.writeQuery({ query: ListsQuery, data });
       }),
     })
-    e.preventdefault();
+    e.preventDefault();
   }
 
   deleteList = async list => {
@@ -482,6 +488,49 @@ class App extends Component {
     })
   }
 
+  sort= (list, dragging) => {
+    const state = this.state;
+    this.props.list.lists = list;
+    state.dragging = dragging;
+    this.setState({state});
+  }
+
+
+  onDragOver = e => {
+    e.preventDefault();
+    const i = e.currentTarget.dataset.id;
+    const dragging = (i === this.state.dragging) ? "dragging" : "";
+    this.setState({ dragging: dragging})
+  }
+
+  handleListDrop = e => {
+    e.preventDefault()
+  }
+
+  handleListDrag = (e) => {
+    e.preventDefault();
+    const dragged = Number(e.currentTarget.dataset.id)
+    console.log(dragged)
+    const items = this.props.list.lists;
+    const over = e.currentTarget;
+    console.log(over)
+    const dragging = this.state.dragging;
+    const from = isFinite(dragging) ? dragging : dragged;
+    console.log(dragging)
+    let to = Number(over.dataset.id);
+    console.log(to)
+
+    items.splice(to, 0, items.splice(from,1)[0]);
+    this.sort(items, to);
+  }
+
+  handleCardDrop = e => {
+    e.preventDefault()
+  }
+
+  handleCardDrag = () => {
+
+  }
 
   render() {
     const listId = this.state.listId;
@@ -503,9 +552,28 @@ class App extends Component {
     if (loading) return null;
     return (
       <div className="board">
-        <div className="singleBoard">
-          {lists.map(list => list =
-            <div className="list">
+        <div className="topIcons">
+          <span className="topHomeIcon"><FontAwesomeIcon icon="home" size="lg" /></span>
+          <span className="topTrelIcon"><FontAwesomeIcon icon={['fab', 'trello']} size="lg" /> Boards </span>
+          <span className="topSearchIcon"><input className="input" /><FontAwesomeIcon icon="search" size="lg" /></span>
+          <span className="topTitleIcon"><FontAwesomeIcon icon={['fab', 'trello']} size="lg" /> Trello </span>
+          <span className="topPlusIcon"><FontAwesomeIcon icon="plus" size="lg" /></span>
+          <span className="topInfoIcon"><FontAwesomeIcon icon="info-circle" size="lg" /></span>
+          <span className="topBellIcon"><FontAwesomeIcon icon="bell" size="lg" /></span>
+        </div>
+        <div
+          className="singleBoard"
+          onDragOver={(e) => this.onDragOver(e)}
+          onDrop={(e) => this.handleListDrop(e)}>
+          {lists.map((list, i) => list =
+            <div
+              className="list"
+              key={list.id}
+              data-id={i}
+              draggable
+              onDrag={(e) => this.handleListDrag(e)}
+              onDragOver={(e) => this.onDragOver(e)}
+              onDrop={(e) => this.handleCardDrop(e)}>
               <div>
                 <div className="listName" key={list.id}
                   onClick={() => this.handleUpdateList(list)}>
@@ -529,8 +597,13 @@ class App extends Component {
                     <div type="submit"></div>
                   </Form>
                 )}
-                {cards.map(card => card.listId === list.id ? card =
-                  <div key={card.id} className='item'>
+                {cards.map((card, i) => card.listId === list.id ? card =
+                  <div
+                    className='item'
+                    key={card.id}
+                    data-id={i}
+                    draggable
+                    onDrag={(e) => this.handleCardDrag(e)}>
                     <div className="titles">
                       <span className='cardTitle'
                         onClick={this.toggle.bind(this, card.id, card.listId, card.title)}>
@@ -545,7 +618,7 @@ class App extends Component {
                           className={this.props.className}>
                           <ModalHeader
                             toggle={this.toggleSmall}>Change Card Title
-                        </ModalHeader>
+                          </ModalHeader>
                           <ModalBody>
                             <Form>
                               <FormGroup>
@@ -570,8 +643,8 @@ class App extends Component {
                       toggle={this.toggle}
                     >
                       {lists.map(list => list.card.map(card => card.id === cardId ? card =
-                        <div>
-                          <ModalHeader toggle={this.toggle} key={card.id} id={UUID()}>{card.title}
+                        <div key={card.id} className="detailsBox">
+                          <ModalHeader toggle={this.toggle} id={UUID()}>{card.title}
                             <p> in List: {list.name}</p>
                           </ModalHeader>
                           <ModalBody>
@@ -584,11 +657,11 @@ class App extends Component {
                                     <IconButton className='icon' onClick={() => this.deleteDescription(element)}><CloseIcon /></IconButton>
                                   </span>
                                 </li>
-                              : null)}
+                                : null)}
                               <Form>
                                 <FormGroup>
                                   <Input
-                                    type="text"
+                                    type="textarea"
                                     name="description"
                                     placeholder="Add more description"
                                     onChange={this.handleChange}
@@ -599,7 +672,7 @@ class App extends Component {
                               </Form>
                             </div>
                             <div className="comment">Comments:
-                            {comments.map(element =>  element.cardId === card.id ?
+                            {comments.map(element => element.cardId === card.id ?
                                 <li key={element.id}
                                   onClick={() => this.editFunction(element)}>
                                   {element.comment}
@@ -607,11 +680,11 @@ class App extends Component {
                                     <IconButton className='icon' onClick={() => this.deleteComment(element)}><CloseIcon /></IconButton>
                                   </span>
                                 </li>
-                              : null )}
+                                : null)}
                               <Form>
                                 <FormGroup>
                                   <Input
-                                    type="text"
+                                    type="textarea"
                                     name="comment"
                                     placeholder="Add more comments"
                                     onChange={this.handleChange}
@@ -691,6 +764,8 @@ class App extends Component {
     )
   }
 }
+
+library.add(fab, faHome, faSearch, faPlus, faInfoCircle, faBell)
 
 export default compose(
   graphql(ListsQuery, { name: "list" }),

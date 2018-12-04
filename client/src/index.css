@@ -4,15 +4,121 @@ body {
   font-family: Helvetica Neue,Arial,Helvetica,sans-serif;
   font-size: 14px;
   background-color: #026aa7;
-  overflow-x: scroll;
-  overflow-y: hidden;
   width: 100%;
   height: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
 }
 
 .board {
   min-width: 100%;
   white-space: nowrap;
+}
+
+.topIcons {
+  padding: 13px 0px 7px 0px;
+  overflow: hidden;
+}
+
+.topHomeIcon {
+  background-color: hsla(0,0%,100%,.3);
+  border-radius: 3px;
+  border: 5px;
+  color:#fff;
+  font-size: 15px;
+  height: 32px;
+  margin: 4px;
+  min-height: 32px;
+  padding: 10px;
+  line-height: 19px;
+}
+
+.topTrelIcon {
+  background-color: hsla(0,0%,100%,.3);
+  border-radius: 3px;
+  border: 5px;
+  color:#fff;
+  font-size: 15px;
+  height: 32px;
+  margin: 4px;
+  min-height: 32px;
+  padding: 10px;
+  line-height: 19px;
+}
+
+.topSearchIcon {
+  background-color: hsla(0,0%,100%,.3);
+  border-radius: 3px;
+  border: 5px;
+  color:#fff;
+  font-size: 15px;
+  height: 32px;
+  margin: 4px;
+  min-height: 32px;
+  padding: 10px;
+  line-height: 19px;
+}
+
+.input {
+  background-color: rgba(231, 228, 228, 0.2);
+}
+
+.topTitleIcon {
+  background-color: hsla(0,0%,100%,.02);
+  border-radius: 3px;
+  border: 5px;
+  color:rgb(221, 215, 215);
+  font-weight: bold;
+  font-family: cursive;
+  font-style: italic;
+  font-size: 15px;
+  height: 32px;
+  align-items: center;
+  min-height: 32px;
+  margin-left: 25%;
+  margin-right: -50%;
+  padding: 10px;
+  line-height: 19px;
+}
+
+.topPlusIcon {
+  background-color: hsla(0,0%,100%,.3);
+  border-radius: 3px;
+  border: 5px;
+  color:#fff;
+  font-size: 15px;
+  height: 32px;
+  margin-right: -5%;
+  margin-left: 80%;
+  min-height: 32px;
+  padding: 10px;
+  line-height: 19px;
+}
+
+.topInfoIcon {
+  background-color: hsla(0,0%,100%,.3);
+  border-radius: 3px;
+  border: 5px;
+  color:#fff;
+  font-size: 15px;
+  height: 32px;
+  margin-left: 5.3%;
+  min-height: 32px;
+  padding: 10px;
+  line-height: 19px;
+}
+
+.topBellIcon {
+  background-color: hsla(0,0%,100%,.3);
+  border-radius: 3px;
+  border: 5px;
+  color:#fff;
+  font-size: 15px;
+  height: 32px;
+  margin-left: 0.2%;
+  min-height: 32px;
+  padding: 10px;
+  line-height: 19px;
 }
 
 .singleBoard {
@@ -57,6 +163,10 @@ body {
 
 .modal-backdrop.show {
   opacity: 0.2;
+}
+
+.detailsBox {
+  background-color:#ebeef0;
 }
 
 .description {
