@@ -1,7 +1,7 @@
 const { GraphQLServer } = require('graphql-yoga');
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://localhost/test2", { useNewUrlParser: true });
+mongoose.connect("mongodb://localhost/test2", { useNewUrlParser: true, useFindAndModify: false });
 
 const List = mongoose.model("List", {
   name: String,

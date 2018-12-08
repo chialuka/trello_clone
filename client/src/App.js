@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import gql from "graphql-tag";
 import UUID from 'uuid/v4';
 import { graphql, compose } from 'react-apollo';
@@ -10,7 +11,7 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { fab } from '@fortawesome/free-brands-svg-icons';
-import { faHome, faSearch, faPlus, faInfoCircle, faBell } from '@fortawesome/free-solid-svg-icons'
+import { faHome, faSearch, faPlus, faInfoCircle, faBell } from '@fortawesome/free-solid-svg-icons';
 
 
 const ListsQuery = gql`
@@ -191,6 +192,8 @@ class App extends Component {
     cardTitle: "",
     listName: "",
     dragging: undefined,
+    lists: this.props.list,
+    cards: this.props.card
   }
 
   toggle = (id, listId, title) => {
@@ -488,49 +491,30 @@ class App extends Component {
     })
   }
 
-  sort= (list, dragging) => {
-    const state = this.state;
-    this.props.list.lists = list;
-    state.dragging = dragging;
-    this.setState({state});
-  }
+  // onDragOver = e => {
+  //   e.preventDefault();
+  // }
 
+  // handleListDrop = e => {
+  //   e.preventDefault()
+  // }
 
-  onDragOver = e => {
-    e.preventDefault();
-    const i = e.currentTarget.dataset.id;
-    const dragging = (i === this.state.dragging) ? "dragging" : "";
-    this.setState({ dragging: dragging})
-  }
+  // handleListDrag = (e) => {
 
-  handleListDrop = e => {
-    e.preventDefault()
-  }
+  // }
 
-  handleListDrag = (e) => {
-    e.preventDefault();
-    const dragged = Number(e.currentTarget.dataset.id)
-    console.log(dragged)
-    const items = this.props.list.lists;
-    const over = e.currentTarget;
-    console.log(over)
-    const dragging = this.state.dragging;
-    const from = isFinite(dragging) ? dragging : dragged;
-    console.log(dragging)
-    let to = Number(over.dataset.id);
-    console.log(to)
+  // handleCardDrop = e => {
+  //   e.preventDefault();
+  // }
 
-    items.splice(to, 0, items.splice(from,1)[0]);
-    this.sort(items, to);
-  }
+  // handleCardDrag = () => {
 
-  handleCardDrop = e => {
-    e.preventDefault()
-  }
+  // }
 
-  handleCardDrag = () => {
+  onDragEnd = () => {
 
   }
+
 
   render() {
     const listId = this.state.listId;
@@ -548,6 +532,7 @@ class App extends Component {
     const { card: { cards } } = this.props;
     const { description: { descriptions } } = this.props;
     const { comment: { comments } } = this.props;
+    console.log(this.props.list)
 
     if (loading) return null;
     return (
@@ -561,205 +546,226 @@ class App extends Component {
           <span className="topInfoIcon"><FontAwesomeIcon icon="info-circle" size="lg" /></span>
           <span className="topBellIcon"><FontAwesomeIcon icon="bell" size="lg" /></span>
         </div>
-        <div
-          className="singleBoard"
-          onDragOver={(e) => this.onDragOver(e)}
-          onDrop={(e) => this.handleListDrop(e)}>
-          {lists.map((list, i) => list =
-            <div
-              className="list"
-              key={list.id}
-              data-id={i}
-              draggable
-              onDrag={(e) => this.handleListDrag(e)}
-              onDragOver={(e) => this.onDragOver(e)}
-              onDrop={(e) => this.handleCardDrop(e)}>
-              <div>
-                <div className="listName" key={list.id}
-                  onClick={() => this.handleUpdateList(list)}>
-                  <div style={{ display: isListUpdate && list.id === listId ? 'none' : 'block', cursor: "pointer" }}>
-                    {list.name}
-                    <span className='lIcon'>
-                      <IconButton className='icon' onClick={() => this.deleteList(list)}><CloseIcon /></IconButton>
-                    </span>
-                  </div>
-                </div>
-                {isListUpdate && list.id === listId && (
-                  <Form onSubmit={(e) => this.updateList(e, listName, listId)}>
-                    <FormGroup>
-                      <Input
-                        type="text"
-                        name="listName"
-                        placeholder={list.name}
-                        onChange={this.handleChange}
-                        value={listName} />
-                    </FormGroup>
-                    <div type="submit"></div>
-                  </Form>
-                )}
-                {cards.map((card, i) => card.listId === list.id ? card =
-                  <div
-                    className='item'
-                    key={card.id}
-                    data-id={i}
-                    draggable
-                    onDrag={(e) => this.handleCardDrag(e)}>
-                    <div className="titles">
-                      <span className='cardTitle'
-                        onClick={this.toggle.bind(this, card.id, card.listId, card.title)}>
-                        {card.title}
-                      </span>
-                      <span className='icons'>
-                        <IconButton className='icon' onClick={this.toggleSmall.bind(this, card.id, card.listId, card.title)}><EditIcon /></IconButton>
-                        <Modal
-                          isOpen={this.state.smallModal}
-                          toggle={this.toggleSmall}
-                          size="sm"
-                          className={this.props.className}>
-                          <ModalHeader
-                            toggle={this.toggleSmall}>Change Card Title
-                          </ModalHeader>
-                          <ModalBody>
-                            <Form>
-                              <FormGroup>
-                                <Input
-                                  type="textbox"
-                                  name="cardTitle"
-                                  placeholder={card.title}
-                                  onChange={this.handleChange}
-                                  value={cardTitle} />
-                              </FormGroup>
-                            </Form>
-                          </ModalBody>
-                          <ModalFooter>
-                            <Button color="primary" onClick={() => this.updateCard(cardId, listId, cardTitle)}>Save</Button>{' '}
-                          </ModalFooter>
-                        </Modal>
-                        <IconButton className='icon' onClick={() => this.deleteCard(card)}><DeleteOutlineIcon /></IconButton>
-                      </span>
-                    </div>
-                    <Modal
-                      isOpen={this.state.bigModal}
-                      toggle={this.toggle}
-                    >
-                      {lists.map(list => list.card.map(card => card.id === cardId ? card =
-                        <div key={card.id} className="detailsBox">
-                          <ModalHeader toggle={this.toggle} id={UUID()}>{card.title}
-                            <p> in List: {list.name}</p>
-                          </ModalHeader>
-                          <ModalBody>
-                            <div className="description">Description:
-                            {descriptions.map(element => element.cardId === card.id ?
-                                <li key={element.id}
-                                  onClick={() => this.editFunction(element)}>
-                                  {element.description}
-                                  <span className='dIcon'>
-                                    <IconButton className='icon' onClick={() => this.deleteDescription(element)}><CloseIcon /></IconButton>
-                                  </span>
-                                </li>
-                                : null)}
-                              <Form>
-                                <FormGroup>
-                                  <Input
-                                    type="textarea"
-                                    name="description"
-                                    placeholder="Add more description"
-                                    onChange={this.handleChange}
-                                    value={description} />
-                                </FormGroup>
-                                <Button size="sm"
-                                  onClick={() => this.submitDescription(description, cardId, descriptionId)}>Save</Button>
-                              </Form>
-                            </div>
-                            <div className="comment">Comments:
-                            {comments.map(element => element.cardId === card.id ?
-                                <li key={element.id}
-                                  onClick={() => this.editFunction(element)}>
-                                  {element.comment}
-                                  <span className='cIcon'>
-                                    <IconButton className='icon' onClick={() => this.deleteComment(element)}><CloseIcon /></IconButton>
-                                  </span>
-                                </li>
-                                : null)}
-                              <Form>
-                                <FormGroup>
-                                  <Input
-                                    type="textarea"
-                                    name="comment"
-                                    placeholder="Add more comments"
-                                    onChange={this.handleChange}
-                                    value={comment} />
-                                </FormGroup>
-                                <Button size="sm"
-                                  onClick={() => this.submitComment(comment, cardId, commentId)}>Save</Button>
-                              </Form>
-                            </div>
-                          </ModalBody>
-                        </div>
-                        : null))}
-                    </Modal>
-                  </div>
-                  : null)}
-              </div>
-              <div>
+        <DragDropContext onDragEnd={this.onDragEnd}>
+          <div
+            className="singleBoard">
+            <Droppable droppableId={UUID()}>
+              {(provided) => (
                 <div
-                  className="createCard"
-                  onClick={() => this.handleCreateCard(list)}>
-                  <div style={{ display: isCardCreate && list.id === listId ? 'none' : 'block', cursor: "pointer" }}>
-                    + Add a card
+                  innerRef={provided.innerRef}
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}>
+                  {lists.map((list, index) => list =
+                    <Draggable
+                      className="list"
+                      key={list.id}
+                      index={index}
+                      draggableId={list.id}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          innerRef={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}>
+                          <div>
+                            <div className="listName" key={list.id}
+                              onClick={() => this.handleUpdateList(list)}>
+                              <div style={{ display: isListUpdate && list.id === listId ? 'none' : 'block', cursor: "pointer" }}>
+                                {list.name}
+                                <span className='lIcon'>
+                                  <IconButton className='icon' onClick={() => this.deleteList(list)}><CloseIcon /></IconButton>
+                                </span>
+                              </div>
+                            </div>
+                            {isListUpdate && list.id === listId && (
+                              <Form onSubmit={(e) => this.updateList(e, listName, listId)}>
+                                <FormGroup>
+                                  <Input
+                                    type="text"
+                                    name="listName"
+                                    placeholder={list.name}
+                                    onChange={this.handleChange}
+                                    value={listName} />
+                                </FormGroup>
+                                <div type="submit"></div>
+                              </Form>
+                            )}
+                            {cards.map((card, index) => card.listId === list.id ? card =
+                              <Draggable
+                                className='item'
+                                key={card.id}
+                                index={index}
+                                draggableId={card.id}>
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    innerRef={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}>
+                                    <div className="titles">
+                                      <span className='cardTitle'
+                                        onClick={this.toggle.bind(this, card.id, card.listId, card.title)}>
+                                        {card.title}
+                                      </span>
+                                      <span className='icons'>
+                                        <IconButton className='icon' onClick={this.toggleSmall.bind(this, card.id, card.listId, card.title)}><EditIcon /></IconButton>
+                                        <Modal
+                                          isOpen={this.state.smallModal}
+                                          toggle={this.toggleSmall}
+                                          size="sm"
+                                          className={this.props.className}>
+                                          <ModalHeader
+                                            toggle={this.toggleSmall}>Change Card Title
+                                          </ModalHeader>
+                                          <ModalBody>
+                                            <Form>
+                                              <FormGroup>
+                                                <Input
+                                                  type="textbox"
+                                                  name="cardTitle"
+                                                  placeholder={card.title}
+                                                  onChange={this.handleChange}
+                                                  value={cardTitle} />
+                                              </FormGroup>
+                                            </Form>
+                                          </ModalBody>
+                                          <ModalFooter>
+                                            <Button color="primary" onClick={() => this.updateCard(cardId, listId, cardTitle)}>Save</Button>{' '}
+                                          </ModalFooter>
+                                        </Modal>
+                                        <IconButton className='icon' onClick={() => this.deleteCard(card)}><DeleteOutlineIcon /></IconButton>
+                                      </span>
+                                    </div>
+                                    <Modal
+                                      isOpen={this.state.bigModal}
+                                      toggle={this.toggle}>
+                                      {lists.map(list => list.card.map(card => card.id === cardId ? card =
+                                        <div key={card.id} className="detailsBox">
+                                          <ModalHeader toggle={this.toggle} id={UUID()}>{card.title}
+                                            <p> in List: {list.name}</p>
+                                          </ModalHeader>
+                                          <ModalBody>
+                                            <div className="description">Description:
+                                              {descriptions.map(element => element.cardId === card.id ?
+                                                <li key={element.id}
+                                                  onClick={() => this.editFunction(element)}>
+                                                  {element.description}
+                                                  <span className='dIcon'>
+                                                    <IconButton className='icon' onClick={() => this.deleteDescription(element)}><CloseIcon /></IconButton>
+                                                  </span>
+                                                </li>
+                                                : null)}
+                                              <Form>
+                                                <FormGroup>
+                                                  <Input
+                                                    type="textarea"
+                                                    name="description"
+                                                    placeholder="Add more description"
+                                                    onChange={this.handleChange}
+                                                    value={description} />
+                                                </FormGroup>
+                                                <Button size="sm"
+                                                  onClick={() => this.submitDescription(description, cardId, descriptionId)}>Save</Button>
+                                              </Form>
+                                            </div>
+                                            <div className="comment">Comments:
+                                              {comments.map(element => element.cardId === card.id ?
+                                                <li key={element.id}
+                                                  onClick={() => this.editFunction(element)}>
+                                                  {element.comment}
+                                                  <span className='cIcon'>
+                                                    <IconButton className='icon' onClick={() => this.deleteComment(element)}><CloseIcon /></IconButton>
+                                                  </span>
+                                                </li>
+                                                : null)}
+                                              <Form>
+                                                <FormGroup>
+                                                  <Input
+                                                    type="textarea"
+                                                    name="comment"
+                                                    placeholder="Add more comments"
+                                                    onChange={this.handleChange}
+                                                    value={comment} />
+                                                </FormGroup>
+                                                <Button size="sm"
+                                                  onClick={() => this.submitComment(comment, cardId, commentId)}>Save</Button>
+                                              </Form>
+                                            </div>
+                                          </ModalBody>
+                                        </div>
+                                        : null))}
+                                    </Modal>
+                                  </div>
+                                )}
+                              </Draggable>
+                              : null)}
+                          </div>
+                          <div>
+                            <div
+                              className="createCard"
+                              onClick={() => this.handleCreateCard(list)}>
+                              <div style={{ display: isCardCreate && list.id === listId ? 'none' : 'block', cursor: "pointer" }}>
+                                + Add a card
+                              </div>
+                            </div>
+                            {isCardCreate && list.id === listId && (
+                              <Form>
+                                <FormGroup>
+                                  <Input
+                                    type="textarea"
+                                    name="cardTitle"
+                                    placeholder="Enter title for this card"
+                                    onChange={this.handleChange}
+                                    value={cardTitle} />
+                                </FormGroup>
+                                <Button size="sm" color="success"
+                                  onClick={() => this.createCard(cardTitle, listId)}>
+                                  Add Card
+                                </Button>
+                                <span>
+                                  <IconButton onClick={() => this.handleCreateCard(list)}><CloseIcon /></IconButton>
+                                </span>
+                              </Form>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  )}
+                  {provided.placeholder}
                 </div>
+              )}
+            </Droppable>
+            <div className="newList">
+              <div style={{ display: isListCreate ? 'none' : 'block', cursor: "pointer" }}
+                className="createList"
+                onClick={() => this.handleCreateList()}>
+                <div>
+                  + Add another List
+                  </div>
                 </div>
-                {isCardCreate && list.id === listId && (
-                  <Form>
-                    <FormGroup>
-                      <Input
-                        type="textarea"
-                        name="cardTitle"
-                        placeholder="Enter title for this card"
-                        onChange={this.handleChange}
-                        value={cardTitle} />
-                    </FormGroup>
-                    <Button size="sm" color="success"
-                      onClick={() => this.createCard(cardTitle, listId)}>
-                      Add Card
-                </Button>
-                    <span>
-                      <IconButton onClick={() => this.handleCreateCard(list)}><CloseIcon /></IconButton>
-                    </span>
-                  </Form>
-                )}
-              </div>
+                {isListCreate && (
+                <Form>
+                  <FormGroup>
+                    <Input
+                      type="text"
+                      name="listName"
+                      placeholder="Enter title for this List"
+                      onChange={this.handleChange}
+                      value={listName} />
+                  </FormGroup>
+                  <Button size="sm" color="success"
+                    onClick={() => this.createList(listName)}>
+                    Add List
+                    </Button>
+                  <span>
+                    <IconButton onClick={() => this.handleCreateList()}><CloseIcon /></IconButton>
+                  </span>
+                </Form>
+              )}
             </div>
-          )}
-          <div className="newList">
-            <div style={{ display: isListCreate ? 'none' : 'block', cursor: "pointer" }}
-              className="createList"
-              onClick={() => this.handleCreateList()}>
-              <div>
-                + Add another List
-            </div>
-            </div>
-            {isListCreate && (
-              <Form>
-                <FormGroup>
-                  <Input
-                    type="text"
-                    name="listName"
-                    placeholder="Enter title for this List"
-                    onChange={this.handleChange}
-                    value={listName} />
-                </FormGroup>
-                <Button size="sm" color="success"
-                  onClick={() => this.createList(listName)}>
-                  Add List
-                </Button>
-                <span>
-                  <IconButton onClick={() => this.handleCreateList()}><CloseIcon /></IconButton>
-                </span>
-              </Form>
-            )}
           </div>
-        </div>
+        </DragDropContext>
       </div>
     )
   }
