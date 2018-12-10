@@ -214,7 +214,7 @@ class App extends Component {
 
   handleCreateCard = (list) => {
     const isCardCreate = this.state.isCardCreate;
-    this.setState({ isCardCreate: !isCardCreate, listId: list.props.children[0].props.children[0].key })
+    this.setState({ isCardCreate: !isCardCreate, listId: list.key })
   }
 
   handleCreateList = () => {
@@ -224,7 +224,7 @@ class App extends Component {
 
   handleUpdateList = (list) => {
     const isOpen = this.state.isListUpdate;
-    this.setState({ isListUpdate: !isOpen, listId: list.props.children[0].props.children[0].key })
+    this.setState({ isListUpdate: !isOpen, listId: list.key })
   }
 
   createList = async listName => {
@@ -245,6 +245,7 @@ class App extends Component {
   }
 
   updateList = async (e, listName, listId) => {
+    e.preventDefault();
     await this.props.updateList({
       variables: {
         name: listName,
@@ -266,20 +267,18 @@ class App extends Component {
         store.writeQuery({ query: ListsQuery, data });
       }),
     })
-    e.preventDefault();
   }
 
   deleteList = async list => {
-    const id = list.props.children[0].props.children[0].key
     await this.props.deleteList({
       variables: {
-        id: id
+        id: list.key
       },
       update: (store => {
         // Read the data from our cache for this query.
         const data = store.readQuery({ query: ListsQuery });
         // Add our comment from the mutation to the end.
-        data.lists = data.lists.filter(x => x.id !== id);
+        data.lists = data.lists.filter(x => x.id !== list.key);
         // Write our data back to the cache.
         store.writeQuery({ query: ListsQuery, data });
       }),
@@ -511,10 +510,13 @@ class App extends Component {
 
   // }
 
-  onDragEnd = () => {
-
+  onDragEnd = result => {
+    console.log(result)
   }
 
+  changeId = () => {
+    UUID();
+  }
 
   render() {
     const listId = this.state.listId;
@@ -532,11 +534,11 @@ class App extends Component {
     const { card: { cards } } = this.props;
     const { description: { descriptions } } = this.props;
     const { comment: { comments } } = this.props;
-    console.log(this.props.list)
+    //const changeId = UUID();
 
     if (loading) return null;
     return (
-      <div className="board">
+      <div>
         <div className="topIcons">
           <span className="topHomeIcon"><FontAwesomeIcon icon="home" size="lg" /></span>
           <span className="topTrelIcon"><FontAwesomeIcon icon={['fab', 'trello']} size="lg" /> Boards </span>
@@ -547,68 +549,69 @@ class App extends Component {
           <span className="topBellIcon"><FontAwesomeIcon icon="bell" size="lg" /></span>
         </div>
         <DragDropContext onDragEnd={this.onDragEnd}>
-          <div
-            className="singleBoard">
-            <Droppable droppableId={UUID()}>
+          <div className="board">
+            <Droppable
+              droppableId={UUID()}
+            >
               {(provided) => (
                 <div
-                  innerRef={provided.innerRef}
                   ref={provided.innerRef}
-                  {...provided.droppableProps}>
+                  {...provided.droppableProps}
+                  className="singleBoard">
                   {lists.map((list, index) => list =
                     <Draggable
-                      className="list"
                       key={list.id}
+                      list={list}
                       index={index}
                       draggableId={list.id}>
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
-                          innerRef={provided.innerRef}
                           {...provided.draggableProps}
-                          {...provided.dragHandleProps}>
+                          {...provided.dragHandleProps}
+                          className="list">
                           <div>
                             <div className="listName" key={list.id}
                               onClick={() => this.handleUpdateList(list)}>
-                              <div style={{ display: isListUpdate && list.id === listId ? 'none' : 'block', cursor: "pointer" }}>
-                                {list.name}
+                              <div style={{ display: isListUpdate && list.key === listId ? 'none' : 'block', cursor: "pointer" }}>
+                                {list.props.list.name}
                                 <span className='lIcon'>
                                   <IconButton className='icon' onClick={() => this.deleteList(list)}><CloseIcon /></IconButton>
                                 </span>
                               </div>
                             </div>
-                            {isListUpdate && list.id === listId && (
+                            {isListUpdate && list.key === listId && (
                               <Form onSubmit={(e) => this.updateList(e, listName, listId)}>
                                 <FormGroup>
                                   <Input
                                     type="text"
                                     name="listName"
-                                    placeholder={list.name}
+                                    placeholder={list.props.list.name}
                                     onChange={this.handleChange}
                                     value={listName} />
                                 </FormGroup>
                                 <div type="submit"></div>
                               </Form>
                             )}
-                            {cards.map((card, index) => card.listId === list.id ? card =
+                            {cards.map((card, index) => card.listId === list.key ? card =
                               <Draggable
-                                className='item'
                                 key={card.id}
+                                card={card}
                                 index={index}
                                 draggableId={card.id}>
                                 {(provided) => (
                                   <div
                                     ref={provided.innerRef}
-                                    innerRef={provided.innerRef}
                                     {...provided.draggableProps}
-                                    {...provided.dragHandleProps}>
+                                    {...provided.dragHandleProps}
+                                    className='item'>
                                     <div className="titles">
                                       <span className='cardTitle'
-                                        onClick={this.toggle.bind(this, card.id, card.listId, card.title)}>
-                                        {card.title}
+                                        onClick={this.toggle.bind(this, card.key, card.props.card.listId, card.props.card.title)}>
+                                        {card.props.card.title}
                                       </span>
                                       <span className='icons'>
-                                        <IconButton className='icon' onClick={this.toggleSmall.bind(this, card.id, card.listId, card.title)}><EditIcon /></IconButton>
+                                        <IconButton className='icon' onClick={this.toggleSmall.bind(this, card.key, card.props.card.listId, card.props.card.title)}><EditIcon /></IconButton>
                                         <Modal
                                           isOpen={this.state.smallModal}
                                           toggle={this.toggleSmall}
@@ -623,7 +626,7 @@ class App extends Component {
                                                 <Input
                                                   type="textbox"
                                                   name="cardTitle"
-                                                  placeholder={card.title}
+                                                  placeholder={card.props.card.title}
                                                   onChange={this.handleChange}
                                                   value={cardTitle} />
                                               </FormGroup>
@@ -704,11 +707,11 @@ class App extends Component {
                             <div
                               className="createCard"
                               onClick={() => this.handleCreateCard(list)}>
-                              <div style={{ display: isCardCreate && list.id === listId ? 'none' : 'block', cursor: "pointer" }}>
+                              <div style={{ display: isCardCreate && list.key === listId ? 'none' : 'block', cursor: "pointer" }}>
                                 + Add a card
                               </div>
                             </div>
-                            {isCardCreate && list.id === listId && (
+                            {isCardCreate && list.key === listId && (
                               <Form>
                                 <FormGroup>
                                   <Input
@@ -743,8 +746,8 @@ class App extends Component {
                 <div>
                   + Add another List
                   </div>
-                </div>
-                {isListCreate && (
+              </div>
+              {isListCreate && (
                 <Form>
                   <FormGroup>
                     <Input

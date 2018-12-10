@@ -13,6 +13,7 @@ body {
 .board {
   min-width: 100%;
   white-space: nowrap;
+  display: flex;
 }
 
 .topIcons {
@@ -261,5 +262,6 @@ body {
 .newList {
   flex: 1 100%;
   min-width: 300px;
+  max-width: 300px;
   margin: 5px;
 }

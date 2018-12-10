@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "server": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "graphql-yoga": "^1.16.7",
     "mongoose": "^5.3.13"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.7"
   }
 }

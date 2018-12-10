@@ -17,6 +17,8 @@
     "react": "^16.6.0",
     "react-apollo": "^2.2.4",
     "react-beautiful-dnd": "^10.0.2",
+    "react-dnd": "^7.0.2",
+    "react-dnd-html5-backend": "^7.0.2",
     "react-dom": "^16.6.0",
     "react-scripts": "2.1.1",
     "reactstrap": "^6.5.0",
