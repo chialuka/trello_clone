@@ -86,6 +86,7 @@ class Description extends Component {
   };
 
   updateDescription = async (description, cardId, descriptionId) => {
+    console.log(description, descriptionId, cardId)
     await this.props.updateDescription({
       variables: {
         description: description,

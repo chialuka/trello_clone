@@ -72,7 +72,7 @@ const typeDefs = `
     deleteList(id: ID!): Boolean!
 
     createCard(title: String! listId: String): Card!
-    updateCard(id: ID! listId: String! title: String!): Card!
+    updateCard(id: ID! listId: String! title: String!): Card
     deleteCard(id: ID!): Boolean!
 
     createComment(cardId: String! comment: String!): Comment!

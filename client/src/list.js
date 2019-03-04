@@ -2,16 +2,11 @@ import React, { Component } from "react";
 import { graphql, compose } from "react-apollo";
 import gql from "graphql-tag";
 import { Droppable, Draggable } from "react-beautiful-dnd";
-import {
-  Form,
-  FormGroup,
-  Input,
-  Button
-} from "reactstrap";
+import { Form, FormGroup, Input, Button } from "reactstrap";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import UUID from "uuid/v4";
-import Card from "./card"
+import Card from "./card";
 
 const ListsQuery = gql`
   {
@@ -25,12 +20,10 @@ const ListsQuery = gql`
         descriptions {
           description
           id
-          cardId
         }
         comments {
           comment
           id
-          cardId
         }
       }
     }
@@ -40,8 +33,13 @@ const ListsQuery = gql`
 const createListMutation = gql`
   mutation($name: String!) {
     createList(name: $name) {
-      name
       id
+      name
+      card {
+        id
+        listId
+        title
+      }
     }
   }
 `;
@@ -51,6 +49,11 @@ const updateListMutation = gql`
     updateList(name: $name, id: $id) {
       id
       name
+      card {
+        title
+        id
+        listId
+      }
     }
   }
 `;
@@ -63,68 +66,70 @@ const deleteListMutation = gql`
 
 class List extends Component {
   state = {
-    list: "",
+    name: "",
     listId: "",
     isListCreate: null,
     isListUpdate: null
-  }
+  };
 
-  handleChange = ({target: { name, value } }) => {
-    this.setState({...this.state, [name]: value})
-  }
+  handleChange = ({ target: { name, value } }) => {
+    this.setState({ ...this.state, [name]: value });
+  };
 
   handleCreateList = () => {
     const isOpen = this.state.isListCreate;
     this.setState({ isListCreate: !isOpen });
   };
 
-  handleUpdateList = () => {
+  handleUpdateList = (list) => {
     const isOpen = this.state.isListUpdate;
-    this.setState({ isListUpdate: !isOpen });
+    this.setState({ isListUpdate: !isOpen, listId: list.key });
   };
 
-  createList = async list => {
+  createList = async name => {
+    if (!name) return null;
     await this.props.createList({
       variables: {
-        name: list
+        name: name
       },
       update: (store, { data: { createList } }) => {
         // Read the data from our cache for this query.
         const data = store.readQuery({ query: ListsQuery });
         // Add our comment from the mutation to the end.
         data.lists.push(createList);
-        this.setState({ listName: "", isListCreate: false });
+        this.setState({ name: "", isListCreate: false });
         // Write our data back to the cache.
         store.writeQuery({ query: ListsQuery, data });
       }
     });
   };
 
-  updateList = async (e, listName, listId) => {
-    e.preventDefault();
+  updateList = async (e, name, listId) => {
+    if (!name || !listId) return null;
     await this.props.updateList({
       variables: {
-        name: listName,
+        name: name,
         id: listId
       },
-      update: store => {
-        // Read the data from our cache for this query.
-        const data = store.readQuery({ query: ListsQuery });
-        // Add our comment from the mutation to the end.
-        console.log(data.lists);
-        data.lists = data.lists.map(x =>
-          x.id === listId
-            ? {
-                name: listName,
-                id: listId
-              }
-            : x
-        );
-        this.setState({ listName: "", isListCreate: false });
-        // Write our data back to the cache.
-        store.writeQuery({ query: ListsQuery, data });
-      }
+      // update: store => {
+      //   // Read the data from our cache for this query.
+      //   const data = store.readQuery({ query: ListsQuery });
+      //   // Add our comment from the mutation to the end.
+      //   console.log(data.lists);
+      //   data.lists = data.lists.map(x =>
+      //     x.id === listId
+      //       ? {
+      //           name: name,
+      //           id: listId
+      //         }
+      //       : x
+      //   );
+      //   this.setState({ name: "", isListCreate: false });
+      //   // Write our data back to the cache.
+      //   store.writeQuery({ query: ListsQuery, data });
+      // }
     });
+    e.preventDefault();
   };
 
   deleteList = async list => {
@@ -147,7 +152,7 @@ class List extends Component {
     const {
       data: { loading, error, lists }
     } = this.props;
-    const { list, listId, isListCreate, isListUpdate } = this.state
+    const { name, listId, isListCreate, isListUpdate } = this.state;
 
     if (loading || error) return null;
     return (
@@ -183,10 +188,7 @@ class List extends Component {
                             >
                               <div
                                 style={{
-                                  display:
-                                    isListUpdate
-                                      ? "none"
-                                      : "block",
+                                  display: isListUpdate && list.key === listId ? "none" : "block",
                                   cursor: "pointer"
                                 }}
                               >
@@ -201,32 +203,29 @@ class List extends Component {
                                 </span>
                               </div>
                             </div>
-                            {isListUpdate && (
+                            {isListUpdate && list.key === listId ? (
                               <Form
-                                onSubmit={e =>
-                                  this.updateList(e, list, listId)
-                                }
+                                onSubmit={e => this.updateList(e, name, listId)}
                               >
                                 <FormGroup>
                                   <Input
                                     type="text"
-                                    name="list"
+                                    name="name"
                                     placeholder={list.props.list.name}
                                     onChange={this.handleChange}
-                                    value={list}
+                                    value={name}
                                   />
                                 </FormGroup>
                                 <div type="submit" />
                               </Form>
-                            )}
-                            <Card listId={listId}/>
+                            ): null}
+                            <Card listId={list.props.list.id} />
                           </div>{" "}
                         </div>
                       )}
                     </Draggable>
                   ))
               )}
-
               {provided.placeholder}
             </div>
           )}
@@ -247,16 +246,16 @@ class List extends Component {
               <FormGroup>
                 <Input
                   type="text"
-                  name="list"
+                  name="name"
                   placeholder="Enter title for this List"
                   onChange={this.handleChange}
-                  value={list}
+                  value={name}
                 />
               </FormGroup>
               <Button
                 size="sm"
                 color="success"
-                onClick={() => this.createList(list)}
+                onClick={() => this.createList(name)}
               >
                 Add List
               </Button>

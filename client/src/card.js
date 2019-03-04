@@ -26,6 +26,18 @@ const CardsQuery = gql`
       id
       listId
       title
+      list {
+        name
+        id
+      }
+      descriptions {
+        description
+        id
+      }
+      comments {
+        comment
+        id
+      }
     }
   }
 `;
@@ -33,9 +45,23 @@ const CardsQuery = gql`
 const createCardMutation = gql`
   mutation($title: String!, $listId: String!) {
     createCard(title: $title, listId: $listId) {
-      title
       id
       listId
+      title
+      list {
+        name
+        id
+      }
+      descriptions {
+        description
+        id
+        cardId
+      }
+      comments {
+        comment
+        id
+        cardId
+      }
     }
   }
 `;
@@ -44,8 +70,22 @@ const updateCardMutation = gql`
   mutation($title: String!, $listId: String!, $id: ID!) {
     updateCard(title: $title, listId: $listId, id: $id) {
       id
-      title
       listId
+      title
+      list {
+        name
+        id
+      }
+      descriptions {
+        description
+        id
+        cardId
+      }
+      comments {
+        comment
+        id
+        cardId
+      }
     }
   }
 `;
@@ -58,7 +98,7 @@ const deleteCardMutation = gql`
 
 class Card extends React.Component {
   state = {
-    card: "",
+    title: "",
     cardId: "",
     smallModal: false,
     bigModal: false,
@@ -71,7 +111,7 @@ class Card extends React.Component {
       bigModal: !this.state.bigModal,
       cardId: id,
       listId: listId,
-      cardTitle: title
+      title: title
     });
   };
 
@@ -80,23 +120,24 @@ class Card extends React.Component {
       smallModal: !this.state.smallModal,
       cardId: id,
       listId: listId,
-      cardTitle: title
+      title: title
     });
   };
 
-  handleChange = ({target: {name, value}}) => {
-    this.setState({...this.state, [name]: value})
-  }
+  handleChange = ({ target: { name, value } }) => {
+    this.setState({ ...this.state, [name]: value });
+  };
 
   handleCreateCard = () => {
     const isCardCreate = this.state.isCardCreate;
     this.setState({ isCardCreate: !isCardCreate });
   };
 
-  createCard = async (cardTitle, listId) => {
+  createCard = async (title, listId) => {
+    if (!title || !listId) return null;
     await this.props.createCard({
       variables: {
-        title: cardTitle,
+        title: title,
         listId: listId
       },
       update: (store, { data: { createCard } }) => {
@@ -104,39 +145,23 @@ class Card extends React.Component {
         const data = store.readQuery({ query: CardsQuery });
         // Add our comment from the mutation to the end.
         data.cards.push(createCard);
-        this.setState({ cardTitle: "", isCardCreate: false });
+        this.setState({ title: "", isCardCreate: false });
         // Write our data back to the cache.
         store.writeQuery({ query: CardsQuery, data });
       }
     });
   };
 
-  updateCard = async (cardId, listId, cardTitle) => {
+  updateCard = async (cardId, listId, title) => {
+    if (!cardId || !listId || !title) return null;
     await this.props.updateCard({
       variables: {
         id: cardId,
         listId: listId,
-        title: cardTitle
+        title: title
       },
-      update: store => {
-        // Read the data from our cache for this query.
-        const data = store.readQuery({ query: CardsQuery });
-        // Add our comment from the mutation to the end.
-        data.cards = data.cards.map(x =>
-          x.id === cardId
-            ? {
-                id: cardId,
-                listId: listId,
-                title: cardTitle
-              }
-            : x
-        );
-        console.log(data.cards);
-        this.setState({ cardTitle: "", isCardCreate: false });
-        // Write our data back to the cache.
-        store.writeQuery({ query: CardsQuery, data });
-      }
     });
+    this.setState({ smallModal: !this.state.smallModal })
   };
 
   deleteCard = async card => {
@@ -157,9 +182,10 @@ class Card extends React.Component {
 
   render() {
     const {
-      data: { loading, error, cards }, listId
+      data: { loading, error, cards },
+      listId
     } = this.props;
-    const { card, cardId, isCardCreate } = this.state;
+    const { title, cardId, isCardCreate } = this.state;
 
     if (loading || error) return null;
     return (
@@ -219,10 +245,10 @@ class Card extends React.Component {
                                   <FormGroup>
                                     <Input
                                       type="textbox"
-                                      name="card"
-                                      placeholder={card.props.card.title}
+                                      name="title"
+                                      placeholder={card.title}
                                       onChange={this.handleChange}
-                                      value={card}
+                                      value={title}
                                     />
                                   </FormGroup>
                                 </Form>
@@ -231,7 +257,7 @@ class Card extends React.Component {
                                 <Button
                                   color="primary"
                                   onClick={() =>
-                                    this.updateCard(cardId, listId, card)
+                                    this.updateCard(cardId, listId, title)
                                   }
                                 >
                                   Save
@@ -251,25 +277,23 @@ class Card extends React.Component {
                           toggle={this.toggle}
                         >
                           {cards.map(card =>
-                            card.lists.map(list =>
-                              card.id === cardId
-                                ? (card = (
-                                    <div key={card.id} className="detailsBox">
-                                      <ModalHeader
-                                        toggle={this.toggle}
-                                        id={UUID()}
-                                      >
-                                        {card.title}
-                                        <p> in List: {list.name}</p>
-                                      </ModalHeader>
-                                      <ModalBody>
-                                        <Description cardId={cardId}/>
-                                        <Comment cardId={cardId}/>
-                                      </ModalBody>
-                                    </div>
-                                  ))
-                                : null
-                            )
+                            card.id === cardId
+                              ? (card = (
+                                  <div key={card.id} className="detailsBox">
+                                    <ModalHeader
+                                      toggle={this.toggle}
+                                      id={UUID()}
+                                    >
+                                      {card.title}
+                                      <p> in List: {card.list.name}</p>
+                                    </ModalHeader>
+                                    <ModalBody>
+                                      <Description cardId={cardId} />
+                                      <Comment cardId={cardId} />
+                                    </ModalBody>
+                                  </div>
+                                ))
+                              : null
                           )}
                         </Modal>
                       </div>
@@ -280,10 +304,7 @@ class Card extends React.Component {
           )}
         </div>
         <div>
-          <div
-            className="createCard"
-            onClick={() => this.handleCreateCard()}
-          >
+          <div className="createCard" onClick={() => this.handleCreateCard()}>
             <div
               style={{
                 display: isCardCreate ? "none" : "block",
@@ -298,16 +319,16 @@ class Card extends React.Component {
               <FormGroup>
                 <Input
                   type="textarea"
-                  name="card"
+                  name="title"
                   placeholder="Enter title for this card"
                   onChange={this.handleChange}
-                  value={card}
+                  value={title}
                 />
               </FormGroup>
               <Button
                 size="sm"
                 color="success"
-                onClick={() => this.createCard(card, listId)}
+                onClick={() => this.createCard(title, listId)}
               >
                 Add Card
               </Button>
