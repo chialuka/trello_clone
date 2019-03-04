@@ -106,30 +106,14 @@ class List extends Component {
 
   updateList = async (e, name, listId) => {
     if (!name || !listId) return null;
+    e.preventDefault();
     await this.props.updateList({
       variables: {
         name: name,
         id: listId
       },
-      // update: store => {
-      //   // Read the data from our cache for this query.
-      //   const data = store.readQuery({ query: ListsQuery });
-      //   // Add our comment from the mutation to the end.
-      //   console.log(data.lists);
-      //   data.lists = data.lists.map(x =>
-      //     x.id === listId
-      //       ? {
-      //           name: name,
-      //           id: listId
-      //         }
-      //       : x
-      //   );
-      //   this.setState({ name: "", isListCreate: false });
-      //   // Write our data back to the cache.
-      //   store.writeQuery({ query: ListsQuery, data });
-      // }
     });
-    e.preventDefault();
+    this.setState({ isListUpdate: !this.state.isListUpdate, name: ""});
   };
 
   deleteList = async list => {
