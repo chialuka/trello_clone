@@ -5,7 +5,7 @@ import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Form, FormGroup, Input, Button } from "reactstrap";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import UUID from "uuid/v4";
+//import UUID from "uuid/v4";
 import Card from "./card";
 
 const ListsQuery = gql`
@@ -83,7 +83,7 @@ class List extends Component {
 
   handleUpdateList = (list) => {
     const isOpen = this.state.isListUpdate;
-    this.setState({ isListUpdate: !isOpen, listId: list.key });
+    this.setState({ isListUpdate: !isOpen, listId: list.key, name: list.props.list.name });
   };
 
   createList = async name => {
@@ -93,12 +93,9 @@ class List extends Component {
         name: name
       },
       update: (store, { data: { createList } }) => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: ListsQuery });
-        // Add our comment from the mutation to the end.
         data.lists.push(createList);
         this.setState({ name: "", isListCreate: false });
-        // Write our data back to the cache.
         store.writeQuery({ query: ListsQuery, data });
       }
     });
@@ -122,11 +119,8 @@ class List extends Component {
         id: list.key
       },
       update: store => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: ListsQuery });
-        // Add our comment from the mutation to the end.
         data.lists = data.lists.filter(x => x.id !== list.key);
-        // Write our data back to the cache.
         store.writeQuery({ query: ListsQuery, data });
       }
     });
@@ -138,10 +132,11 @@ class List extends Component {
     } = this.props;
     const { name, listId, isListCreate, isListUpdate } = this.state;
 
+    console.log(lists);
     if (loading || error) return null;
     return (
       <div className="board">
-        <Droppable droppableId={UUID()}>
+        <Droppable droppableId="board" type="list">
           {provided => (
             <div
               ref={provided.innerRef}
@@ -164,7 +159,6 @@ class List extends Component {
                           {...provided.dragHandleProps}
                           className="list"
                         >
-                          <div>
                             <div
                               className="listName"
                               key={list.id}
@@ -195,7 +189,7 @@ class List extends Component {
                                   <Input
                                     type="text"
                                     name="name"
-                                    placeholder={list.props.list.name}
+                                    placeholder={name}
                                     onChange={this.handleChange}
                                     value={name}
                                   />
@@ -204,7 +198,6 @@ class List extends Component {
                               </Form>
                             ): null}
                             <Card listId={list.props.list.id} />
-                          </div>{" "}
                         </div>
                       )}
                     </Draggable>

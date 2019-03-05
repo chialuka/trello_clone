@@ -18,17 +18,6 @@ class App extends Component {
   };
 
 
-  // editFunction = element => {
-  //   if (element.comment === undefined) {
-  //     this.setState({
-  //       description: element.description,
-  //       descriptionId: element.id
-  //     });
-  //   } else {
-  //     this.setState({ comment: element.comment, commentId: element.id });
-  //   }
-  // };
-
   // onDragOver = e => {
   //   e.preventDefault();
   // }

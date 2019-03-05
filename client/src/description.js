@@ -74,41 +74,21 @@ class Description extends Component {
         cardId: cardId
       },
       update: (store, { data: { createDescription } }) => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: DescriptionsQuery });
-        // Add our comment from the mutation to the end.
         data.descriptions.push(createDescription);
         this.setState({ description: "" });
-        // Write our data back to the cache.
         store.writeQuery({ query: DescriptionsQuery, data });
       }
     });
   };
 
   updateDescription = async (description, cardId, descriptionId) => {
-    console.log(description, descriptionId, cardId)
     await this.props.updateDescription({
       variables: {
         description: description,
         cardId: cardId,
         id: descriptionId
       },
-      update: store => {
-        // Read the data from our cache for this query.
-        const data = store.readQuery({ query: DescriptionsQuery });
-        // Add our comment from the mutation to the end.
-        data.descriptions = data.descriptions.map(x =>
-          x.id === cardId
-            ? {
-                description: description,
-                cardId: cardId
-              }
-            : x
-        );
-        this.setState({ description: "" });
-        // Write our data back to the cache.
-        store.writeQuery({ query: DescriptionsQuery, data });
-      }
     });
   };
 
@@ -118,12 +98,9 @@ class Description extends Component {
         id: element.id
       },
       update: store => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: DescriptionsQuery });
-        // Add our comment from the mutation to the end.
         this.setState({ description: "" });
         data.descriptions = data.descriptions.filter(x => x.id !== element.id);
-        // Write our data back to the cache.
         store.writeQuery({ query: DescriptionsQuery, data });
       }
     });

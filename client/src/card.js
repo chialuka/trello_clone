@@ -76,16 +76,6 @@ const updateCardMutation = gql`
         name
         id
       }
-      descriptions {
-        description
-        id
-        cardId
-      }
-      comments {
-        comment
-        id
-        cardId
-      }
     }
   }
 `;
@@ -141,12 +131,9 @@ class Card extends React.Component {
         listId: listId
       },
       update: (store, { data: { createCard } }) => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: CardsQuery });
-        // Add our comment from the mutation to the end.
         data.cards.push(createCard);
         this.setState({ title: "", isCardCreate: false });
-        // Write our data back to the cache.
         store.writeQuery({ query: CardsQuery, data });
       }
     });
@@ -170,11 +157,8 @@ class Card extends React.Component {
         id: card.key
       },
       update: store => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: CardsQuery });
-        // Add our comment from the mutation to the end.
         data.cards = data.cards.filter(x => x.id !== card.key);
-        // Write our data back to the cache.
         store.writeQuery({ query: CardsQuery, data });
       }
     });
@@ -187,6 +171,7 @@ class Card extends React.Component {
     } = this.props;
     const { title, cardId, isCardCreate } = this.state;
 
+    console.log(cards)
     if (loading || error) return null;
     return (
       <div>

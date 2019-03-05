@@ -71,12 +71,9 @@ class Comment extends Component {
         cardId: cardId
       },
       update: (store, { data: { createComment } }) => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: CommentsQuery });
-        // Add our comment from the mutation to the end.
         data.comments.push(createComment);
         this.setState({ comment: "" });
-        // Write our data back to the cache.
         store.writeQuery({ query: CommentsQuery, data });
       }
     });
@@ -89,22 +86,6 @@ class Comment extends Component {
         cardId: cardId,
         id: commentId
       },
-      update: store => {
-        // Read the data from our cache for this query.
-        const data = store.readQuery({ query: CommentsQuery });
-        // Add our comment from the mutation to the end.
-        data.comments = data.comments.map(x =>
-          x.id === cardId
-            ? {
-                comment: comment,
-                id: cardId
-              }
-            : x
-        );
-        this.setState({ comment: "" });
-        // Write our data back to the cache.
-        store.writeQuery({ query: CommentsQuery, data });
-      }
     });
   };
 
@@ -114,12 +95,9 @@ class Comment extends Component {
         id: element.id
       },
       update: store => {
-        // Read the data from our cache for this query.
         const data = store.readQuery({ query: CommentsQuery });
-        // Add our comment from the mutation to the end.
         data.comments = data.comments.filter(x => x.id !== element.id);
         this.setState({ comment: "" });
-        // Write our data back to the cache.
         store.writeQuery({ query: CommentsQuery, data });
       }
     });
@@ -138,7 +116,7 @@ class Comment extends Component {
         Comments:
         {comments.map(element =>
           element.cardId === cardId ? (
-            <li key={element.id} onClick={() => this.editFunction(element)}>
+            <div key={element.id} onClick={() => this.editFunction(element)}>
               {element.comment}
               <span className="cIcon">
                 <IconButton
@@ -148,7 +126,7 @@ class Comment extends Component {
                   <CloseIcon />
                 </IconButton>
               </span>
-            </li>
+            </div>
           ) : null
         )}
         <Form>
