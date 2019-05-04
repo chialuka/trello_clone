@@ -1,12 +1,12 @@
-import React, { Component } from "react";
-import { graphql, compose } from "react-apollo";
-import gql from "graphql-tag";
-import { Droppable, Draggable } from "react-beautiful-dnd";
-import { Form, FormGroup, Input, Button } from "reactstrap";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-//import UUID from "uuid/v4";
-import Card from "./card";
+import React, { Component } from 'react';
+import { graphql, compose } from 'react-apollo';
+import gql from 'graphql-tag';
+import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Form, FormGroup, Input, Button } from 'reactstrap';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import UUID from 'uuid/v4';
+import Card from './card';
 
 const ListsQuery = gql`
   {
@@ -66,10 +66,11 @@ const deleteListMutation = gql`
 
 class List extends Component {
   state = {
-    name: "",
-    listId: "",
+    name: '',
+    listId: '',
     isListCreate: null,
-    isListUpdate: null
+    isListUpdate: null,
+    newCard: ''
   };
 
   handleChange = ({ target: { name, value } }) => {
@@ -81,9 +82,13 @@ class List extends Component {
     this.setState({ isListCreate: !isOpen });
   };
 
-  handleUpdateList = (list) => {
+  handleUpdateList = list => {
     const isOpen = this.state.isListUpdate;
-    this.setState({ isListUpdate: !isOpen, listId: list.key, name: list.props.list.name });
+    this.setState({
+      isListUpdate: !isOpen,
+      listId: list.key,
+      name: list.props.list.name
+    });
   };
 
   createList = async name => {
@@ -95,7 +100,7 @@ class List extends Component {
       update: (store, { data: { createList } }) => {
         const data = store.readQuery({ query: ListsQuery });
         data.lists.push(createList);
-        this.setState({ name: "", isListCreate: false });
+        this.setState({ name: '', isListCreate: false });
         store.writeQuery({ query: ListsQuery, data });
       }
     });
@@ -108,9 +113,9 @@ class List extends Component {
       variables: {
         name: name,
         id: listId
-      },
+      }
     });
-    this.setState({ isListUpdate: !this.state.isListUpdate, name: ""});
+    this.setState({ isListUpdate: !this.state.isListUpdate, name: '' });
   };
 
   deleteList = async list => {
@@ -126,17 +131,22 @@ class List extends Component {
     });
   };
 
+  getCard = title => {
+    console.log(title);
+    this.setState({ newCard: title });
+  };
+
   render() {
     const {
       data: { loading, error, lists }
     } = this.props;
-    const { name, listId, isListCreate, isListUpdate } = this.state;
+    const { name, listId, isListCreate, isListUpdate, newCard } = this.state;
 
-    console.log(lists);
+    console.log(lists, newCard);
     if (loading || error) return null;
     return (
       <div className="board">
-        <Droppable droppableId="board" type="list">
+        <Droppable droppableId={UUID()}>
           {provided => (
             <div
               ref={provided.innerRef}
@@ -146,61 +156,64 @@ class List extends Component {
               {lists.map(
                 (list, index) =>
                   (list = (
-                    <Draggable
+                    <Droppable
                       key={list.id}
                       list={list}
                       index={index}
-                      draggableId={list.id}
+                      droppableId={list.id}
                     >
                       {provided => (
                         <div
                           ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
+                          {...provided.droppableProps}
                           className="list"
                         >
+                          <div
+                            className="listName"
+                            key={list.id}
+                            onClick={() => this.handleUpdateList(list)}
+                          >
                             <div
-                              className="listName"
-                              key={list.id}
-                              onClick={() => this.handleUpdateList(list)}
+                              style={{
+                                display:
+                                  isListUpdate && list.key === listId
+                                    ? 'none'
+                                    : 'block',
+                                cursor: 'pointer'
+                              }}
                             >
-                              <div
-                                style={{
-                                  display: isListUpdate && list.key === listId ? "none" : "block",
-                                  cursor: "pointer"
-                                }}
-                              >
-                                {list.props.list.name}
-                                <span className="lIcon">
-                                  <IconButton
-                                    className="icon"
-                                    onClick={() => this.deleteList(list)}
-                                  >
-                                    <CloseIcon />
-                                  </IconButton>
-                                </span>
-                              </div>
+                              {list.props.list.name}
+                              <span className="lIcon">
+                                <IconButton
+                                  className="icon"
+                                  onClick={() => this.deleteList(list)}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </span>
                             </div>
-                            {isListUpdate && list.key === listId ? (
-                              <Form
-                                onSubmit={e => this.updateList(e, name, listId)}
-                              >
-                                <FormGroup>
-                                  <Input
-                                    type="text"
-                                    name="name"
-                                    placeholder={name}
-                                    onChange={this.handleChange}
-                                    value={name}
-                                  />
-                                </FormGroup>
-                                <div type="submit" />
-                              </Form>
-                            ): null}
-                            <Card listId={list.props.list.id} />
+                          </div>
+                          {isListUpdate && list.key === listId ? (
+                            <Form
+                              onSubmit={e => this.updateList(e, name, listId)}
+                            >
+                              <FormGroup>
+                                <Input
+                                  type="text"
+                                  name="name"
+                                  placeholder={name}
+                                  onChange={this.handleChange}
+                                  value={name}
+                                />
+                              </FormGroup>
+                              <div type="submit" />
+                            </Form>
+                          ) : null}
+                          <Card listId={list.props.list.id} />
+                          {provided.placeholder}
                         </div>
                       )}
-                    </Draggable>
+                    </Droppable>
                   ))
               )}
               {provided.placeholder}
@@ -210,8 +223,8 @@ class List extends Component {
         <div className="newList">
           <div
             style={{
-              display: isListCreate ? "none" : "block",
-              cursor: "pointer"
+              display: isListCreate ? 'none' : 'block',
+              cursor: 'pointer'
             }}
             className="createList"
             onClick={() => this.handleCreateList()}
@@ -251,7 +264,7 @@ class List extends Component {
 
 export default compose(
   graphql(ListsQuery),
-  graphql(createListMutation, { name: "createList" }),
-  graphql(updateListMutation, { name: "updateList" }),
-  graphql(deleteListMutation, { name: "deleteList" })
+  graphql(createListMutation, { name: 'createList' }),
+  graphql(updateListMutation, { name: 'updateList' }),
+  graphql(deleteListMutation, { name: 'deleteList' })
 )(List);

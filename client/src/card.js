@@ -93,7 +93,8 @@ class Card extends React.Component {
     smallModal: false,
     bigModal: false,
     isCardCreate: false,
-    dragging: undefined
+    newCard: false,
+    noCard: false,
   };
 
   toggle = (id, listId, title) => {
@@ -114,6 +115,13 @@ class Card extends React.Component {
     });
   };
 
+  // getCard = card => {
+  //   console.log(card);
+  //   const isCard = this.state.isCard;
+  //   console.log(isCard);
+  //   return card ? this.setState({ isCard: !isCard }) : null;
+  // };
+
   handleChange = ({ target: { name, value } }) => {
     this.setState({ ...this.state, [name]: value });
   };
@@ -133,10 +141,11 @@ class Card extends React.Component {
       update: (store, { data: { createCard } }) => {
         const data = store.readQuery({ query: CardsQuery });
         data.cards.push(createCard);
-        this.setState({ title: "", isCardCreate: false });
+        this.setState({ title: "", isCardCreate: false, newCard: true });
         store.writeQuery({ query: CardsQuery, data });
       }
     });
+    this.props.cardChange()
   };
 
   updateCard = async (cardId, listId, title) => {
@@ -146,9 +155,9 @@ class Card extends React.Component {
         id: cardId,
         listId: listId,
         title: title
-      },
+      }
     });
-    this.setState({ smallModal: !this.state.smallModal })
+    this.setState({ smallModal: !this.state.smallModal });
   };
 
   deleteCard = async card => {
@@ -162,16 +171,21 @@ class Card extends React.Component {
         store.writeQuery({ query: CardsQuery, data });
       }
     });
+    this.props.cardChange()
   };
+
+  getCard = () => {
+    this.setState({ noCard : true })
+  }
 
   render() {
     const {
       data: { loading, error, cards },
       listId
     } = this.props;
-    const { title, cardId, isCardCreate } = this.state;
+    const { title, cardId, isCardCreate, noCard } = this.state;
 
-    console.log(cards)
+    console.log(noCard)
     if (loading || error) return null;
     return (
       <div>
@@ -289,15 +303,15 @@ class Card extends React.Component {
           )}
         </div>
         <div>
-          <div className="createCard" onClick={() => this.handleCreateCard()}>
-            <div
-              style={{
-                display: isCardCreate ? "none" : "block",
-                cursor: "pointer"
-              }}
-            >
-              + Add a card
-            </div>
+          <div
+            className="createCard"
+            onClick={() => this.handleCreateCard()}
+            style={{
+              display: isCardCreate ? "none" : "block",
+              cursor: "pointer"
+            }}
+          >
+            {!noCard ? <div>+ Add another card</div> : <div>+Add a card</div>}
           </div>
           {isCardCreate && (
             <Form>

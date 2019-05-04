@@ -1,49 +1,34 @@
-import React, { Component } from "react";
-import { DragDropContext } from "react-beautiful-dnd";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fab } from "@fortawesome/free-brands-svg-icons";
+import React, { Component } from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { fab } from '@fortawesome/free-brands-svg-icons';
 import {
   faHome,
   faSearch,
   faPlus,
   faInfoCircle,
   faBell
-} from "@fortawesome/free-solid-svg-icons";
-import List from "./list";
+} from '@fortawesome/free-solid-svg-icons';
+import List from './list';
 
 class App extends Component {
   state = {
     dragging: undefined
   };
 
-
-  // onDragOver = e => {
-  //   e.preventDefault();
-  // }
-
-  // handleListDrop = e => {
-  //   e.preventDefault()
-  // }
-
-  // handleListDrag = (e) => {
-
-  // }
-
-  // handleCardDrop = e => {
-  //   e.preventDefault();
-  // }
-
-  // handleCardDrag = () => {
-
-  // }
-
-  onDragEnd = result => {
+  changeCardId = result => {
     console.log(result);
   };
 
-  render() {
+  onDragEnd = result => {
+    console.log(result);
+    if (result.destination) {
+      this.changeCardId(result);
+    }
+  };
 
+  render() {
     return (
       <div>
         <div className="topIcons">
@@ -51,14 +36,14 @@ class App extends Component {
             <FontAwesomeIcon icon="home" size="lg" />
           </span>
           <span className="topTrelIcon">
-            <FontAwesomeIcon icon={["fab", "trello"]} size="lg" /> Boards{" "}
+            <FontAwesomeIcon icon={['fab', 'trello']} size="lg" /> Boards{' '}
           </span>
           <span className="topSearchIcon">
             <input className="input" />
             <FontAwesomeIcon icon="search" size="lg" />
           </span>
           <span className="topTitleIcon">
-            <FontAwesomeIcon icon={["fab", "trello"]} size="lg" /> Trello{" "}
+            <FontAwesomeIcon icon={['fab', 'trello']} size="lg" /> Trello{' '}
           </span>
           <span className="topPlusIcon">
             <FontAwesomeIcon icon="plus" size="lg" />
@@ -71,7 +56,7 @@ class App extends Component {
           </span>
         </div>
         <DragDropContext onDragEnd={this.onDragEnd}>
-          <List />
+          <List onDragEnd={this.onDragEnd} />
         </DragDropContext>
       </div>
     );
