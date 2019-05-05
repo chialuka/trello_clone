@@ -2,7 +2,8 @@ This project is a simple clone of popular project management site, Trello. It wa
 
 It is still a work in progress and changes will be made from time to time. Please feel free to contribute and add suggestions. They are both welcome and anticipated.
 
-###Author
+### Author
 Chukwualuka Chiama
 
-###License
+### License
+This project is available under the MIT license. See License file for more details
