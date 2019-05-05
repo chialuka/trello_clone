@@ -143,6 +143,7 @@ class List extends Component {
     const { name, listId, isListCreate, isListUpdate, newCard } = this.state;
 
     console.log(lists, newCard);
+    console.log(this.props.dragInfo);
     if (loading || error) return null;
     return (
       <div className="board">

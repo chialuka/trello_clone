@@ -8,7 +8,7 @@
     "server": "nodemon index.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "graphql-yoga": "^1.16.7",
     "mongoose": "^5.3.13"

@@ -14,21 +14,22 @@ import List from './list';
 
 class App extends Component {
   state = {
-    dragging: undefined
-  };
-
-  changeCardId = result => {
-    console.log(result);
+    dragging: undefined,
+    dragInfo: []
   };
 
   onDragEnd = result => {
+    const { dragInfo } = this.state;
+    this.setState({ dragInfo: [] });
     console.log(result);
     if (result.destination) {
-      this.changeCardId(result);
+      dragInfo.push(result)
+      this.setState({ dragInfo });
     }
   };
 
   render() {
+    const { dragInfo } = this.state;
     return (
       <div>
         <div className="topIcons">
@@ -56,7 +57,7 @@ class App extends Component {
           </span>
         </div>
         <DragDropContext onDragEnd={this.onDragEnd}>
-          <List onDragEnd={this.onDragEnd} />
+          <List dragInfo={dragInfo} />
         </DragDropContext>
       </div>
     );
