@@ -1,6 +1,6 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose, graphql } from "react-apollo";
+import React from 'react';
+import gql from 'graphql-tag';
+import { compose, graphql } from 'react-apollo';
 import {
   Modal,
   ModalHeader,
@@ -10,15 +10,15 @@ import {
   FormGroup,
   Input,
   Button
-} from "reactstrap";
-import { Draggable } from "react-beautiful-dnd";
-import IconButton from "@material-ui/core/IconButton";
-import EditIcon from "@material-ui/icons/Edit";
-import CloseIcon from "@material-ui/icons/Close";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import Description from "./description";
-import Comment from "./comment";
-import UUID from "uuid/v4";
+} from 'reactstrap';
+import { Draggable } from 'react-beautiful-dnd';
+import IconButton from '@material-ui/core/IconButton';
+import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from '@material-ui/icons/Close';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import Description from './description';
+import Comment from './comment';
+import UUID from 'uuid/v4';
 
 const CardsQuery = gql`
   {
@@ -88,14 +88,21 @@ const deleteCardMutation = gql`
 
 class Card extends React.Component {
   state = {
-    title: "",
-    cardId: "",
+    title: '',
+    cardId: '',
     smallModal: false,
     bigModal: false,
     isCardCreate: false,
-    newCard: false,
-    noCard: false,
+    noCard: false
   };
+
+  componentDidMount() {
+    this.props.onRef(this);
+  }
+
+  componentWillUnmount() {
+    this.props.onRef(undefined);
+  }
 
   toggle = (id, listId, title) => {
     this.setState({
@@ -114,13 +121,6 @@ class Card extends React.Component {
       title: title
     });
   };
-
-  // getCard = card => {
-  //   console.log(card);
-  //   const isCard = this.state.isCard;
-  //   console.log(isCard);
-  //   return card ? this.setState({ isCard: !isCard }) : null;
-  // };
 
   handleChange = ({ target: { name, value } }) => {
     this.setState({ ...this.state, [name]: value });
@@ -141,11 +141,10 @@ class Card extends React.Component {
       update: (store, { data: { createCard } }) => {
         const data = store.readQuery({ query: CardsQuery });
         data.cards.push(createCard);
-        this.setState({ title: "", isCardCreate: false, newCard: true });
+        this.setState({ title: '', isCardCreate: false, newCard: true });
         store.writeQuery({ query: CardsQuery, data });
       }
     });
-    this.props.cardChange()
   };
 
   updateCard = async (cardId, listId, title) => {
@@ -157,7 +156,7 @@ class Card extends React.Component {
         title: title
       }
     });
-    this.setState({ smallModal: !this.state.smallModal });
+    this.setState({ smallModal: false });
   };
 
   deleteCard = async card => {
@@ -171,12 +170,11 @@ class Card extends React.Component {
         store.writeQuery({ query: CardsQuery, data });
       }
     });
-    this.props.cardChange()
   };
 
   getCard = () => {
-    this.setState({ noCard : true })
-  }
+    this.setState({ noCard: true });
+  };
 
   render() {
     const {
@@ -185,121 +183,122 @@ class Card extends React.Component {
     } = this.props;
     const { title, cardId, isCardCreate, noCard } = this.state;
 
-    console.log(noCard)
     if (loading || error) return null;
     return (
       <div>
         <div>
-          {cards.map((card, index) =>
-            card.listId === listId
-              ? (card = (
-                  <Draggable
-                    key={card.id}
-                    card={card}
-                    index={index}
-                    draggableId={card.id}
-                  >
-                    {provided => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="item"
-                      >
-                        <div className="titles">
-                          <span
-                            className="cardTitle"
-                            onClick={this.toggle.bind(
-                              this,
-                              card.key,
-                              card.props.card.listId,
-                              card.props.card.title
-                            )}
-                          >
-                            {card.props.card.title}
-                          </span>
-                          <span className="icons">
-                            <IconButton
-                              className="icon"
-                              onClick={this.toggleSmall.bind(
+          {cards.map(
+            (card, index) =>
+              card.listId === listId
+                ? (card = (
+                    <Draggable
+                      key={card.id}
+                      card={card}
+                      index={index}
+                      draggableId={card.id}
+                    >
+                      {provided => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="item"
+                        >
+                          <div className="titles">
+                            <span
+                              className="cardTitle"
+                              onClick={this.toggle.bind(
                                 this,
                                 card.key,
                                 card.props.card.listId,
                                 card.props.card.title
                               )}
                             >
-                              <EditIcon />
-                            </IconButton>
-                            <Modal
-                              isOpen={this.state.smallModal}
-                              toggle={this.toggleSmall}
-                              size="sm"
-                              className={this.props.className}
-                            >
-                              <ModalHeader toggle={this.toggleSmall}>
-                                Change Card Title
-                              </ModalHeader>
-                              <ModalBody>
-                                <Form>
-                                  <FormGroup>
-                                    <Input
-                                      type="textbox"
-                                      name="title"
-                                      placeholder={card.title}
-                                      onChange={this.handleChange}
-                                      value={title}
-                                    />
-                                  </FormGroup>
-                                </Form>
-                              </ModalBody>
-                              <ModalFooter>
-                                <Button
-                                  color="primary"
-                                  onClick={() =>
-                                    this.updateCard(cardId, listId, title)
-                                  }
-                                >
-                                  Save
-                                </Button>{" "}
-                              </ModalFooter>
-                            </Modal>
-                            <IconButton
-                              className="icon"
-                              onClick={() => this.deleteCard(card)}
-                            >
-                              <DeleteOutlineIcon />
-                            </IconButton>
-                          </span>
+                              {card.props.card.title}
+                            </span>
+                            <span className="icons">
+                              <IconButton
+                                className="icon"
+                                onClick={this.toggleSmall.bind(
+                                  this,
+                                  card.key,
+                                  card.props.card.listId,
+                                  card.props.card.title
+                                )}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <Modal
+                                isOpen={this.state.smallModal}
+                                toggle={this.toggleSmall}
+                                size="sm"
+                                className={this.props.className}
+                              >
+                                <ModalHeader toggle={this.toggleSmall}>
+                                  Change Card Title
+                                </ModalHeader>
+                                <ModalBody>
+                                  <Form>
+                                    <FormGroup>
+                                      <Input
+                                        type="textbox"
+                                        name="title"
+                                        placeholder={card.title}
+                                        onChange={this.handleChange}
+                                        value={title}
+                                      />
+                                    </FormGroup>
+                                  </Form>
+                                </ModalBody>
+                                <ModalFooter>
+                                  <Button
+                                    color="primary"
+                                    onClick={() =>
+                                      this.updateCard(cardId, listId, title)
+                                    }
+                                  >
+                                    Save
+                                  </Button>{' '}
+                                </ModalFooter>
+                              </Modal>
+                              <IconButton
+                                className="icon"
+                                onClick={() => this.deleteCard(card)}
+                              >
+                                <DeleteOutlineIcon />
+                              </IconButton>
+                            </span>
+                          </div>
+                          <Modal
+                            isOpen={this.state.bigModal}
+                            toggle={this.toggle}
+                          >
+                            {cards.map(
+                              card =>
+                                card.id === cardId
+                                  ? (card = (
+                                      <div key={card.id} className="detailsBox">
+                                        <ModalHeader
+                                          toggle={this.toggle}
+                                          id={UUID()}
+                                        >
+                                          {card.title}
+                                          <p> in List: {card.list.name}</p>
+                                        </ModalHeader>
+                                        <ModalBody>
+                                          <Description cardId={cardId} />
+                                          <Comment cardId={cardId} />
+                                        </ModalBody>
+                                      </div>
+                                    ))
+                                  : null
+                            )}
+                          </Modal>
                         </div>
-                        <Modal
-                          isOpen={this.state.bigModal}
-                          toggle={this.toggle}
-                        >
-                          {cards.map(card =>
-                            card.id === cardId
-                              ? (card = (
-                                  <div key={card.id} className="detailsBox">
-                                    <ModalHeader
-                                      toggle={this.toggle}
-                                      id={UUID()}
-                                    >
-                                      {card.title}
-                                      <p> in List: {card.list.name}</p>
-                                    </ModalHeader>
-                                    <ModalBody>
-                                      <Description cardId={cardId} />
-                                      <Comment cardId={cardId} />
-                                    </ModalBody>
-                                  </div>
-                                ))
-                              : null
-                          )}
-                        </Modal>
-                      </div>
-                    )}
-                  </Draggable>
-                ))
-              : null
+                      )}
+                    </Draggable>
+                  ))
+                : null
           )}
         </div>
         <div>
@@ -307,8 +306,8 @@ class Card extends React.Component {
             className="createCard"
             onClick={() => this.handleCreateCard()}
             style={{
-              display: isCardCreate ? "none" : "block",
-              cursor: "pointer"
+              display: isCardCreate ? 'none' : 'block',
+              cursor: 'pointer'
             }}
           >
             {!noCard ? <div>+ Add another card</div> : <div>+Add a card</div>}
@@ -346,7 +345,7 @@ class Card extends React.Component {
 
 export default compose(
   graphql(CardsQuery),
-  graphql(createCardMutation, { name: "createCard" }),
-  graphql(updateCardMutation, { name: "updateCard" }),
-  graphql(deleteCardMutation, { name: "deleteCard" })
+  graphql(createCardMutation, { name: 'createCard' }),
+  graphql(updateCardMutation, { name: 'updateCard' }),
+  graphql(deleteCardMutation, { name: 'deleteCard' })
 )(Card);

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import { Form, FormGroup, Input, Button } from 'reactstrap';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
@@ -73,6 +73,25 @@ class List extends Component {
     newCard: ''
   };
 
+  drag = React.createRef();
+
+  onDragEnd = result => {
+    const lists = this.props.data.lists;
+    const {
+      draggableId,
+      destination,
+      source: { droppableId },
+    } = result;
+    if (destination.droppableId === droppableId) {
+      return null;
+    }
+    const list = lists.find(x => x.id === droppableId);
+    const card = list.card.find(y => y.id === draggableId);
+    if (result.destination) {
+      this.drag.updateCard(draggableId, destination.droppableId, card.title);
+    }
+  };
+
   handleChange = ({ target: { name, value } }) => {
     this.setState({ ...this.state, [name]: value });
   };
@@ -131,134 +150,135 @@ class List extends Component {
     });
   };
 
-  getCard = title => {
-    console.log(title);
-    this.setState({ newCard: title });
-  };
 
   render() {
     const {
       data: { loading, error, lists }
     } = this.props;
-    const { name, listId, isListCreate, isListUpdate, newCard } = this.state;
+    const { name, listId, isListCreate, isListUpdate } = this.state;
 
-    console.log(lists, newCard);
-    console.log(this.props.dragInfo);
     if (loading || error) return null;
     return (
-      <div className="board">
-        <Droppable droppableId={UUID()}>
-          {provided => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="singleBoard"
-            >
-              {lists.map(
-                (list, index) =>
-                  (list = (
-                    <Droppable
-                      key={list.id}
-                      list={list}
-                      index={index}
-                      droppableId={list.id}
-                    >
-                      {provided => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="list"
-                        >
+        <DragDropContext onDragEnd={this.onDragEnd}>
+        <div className="board">
+          <Droppable droppableId={UUID()}>
+            {provided => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="singleBoard"
+              >
+                {lists.map(
+                  (list, index) =>
+                    (list = (
+                      <Droppable
+                        key={list.id}
+                        list={list}
+                        index={index}
+                        droppableId={list.id}
+                      >
+                        {provided => (
                           <div
-                            className="listName"
-                            key={list.id}
-                            onClick={() => this.handleUpdateList(list)}
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className="list"
                           >
                             <div
-                              style={{
-                                display:
-                                  isListUpdate && list.key === listId
-                                    ? 'none'
-                                    : 'block',
-                                cursor: 'pointer'
-                              }}
+                              className="listName"
+                              key={list.id}
+                              onClick={() => this.handleUpdateList(list)}
                             >
-                              {list.props.list.name}
-                              <span className="lIcon">
-                                <IconButton
-                                  className="icon"
-                                  onClick={() => this.deleteList(list)}
-                                >
-                                  <CloseIcon />
-                                </IconButton>
-                              </span>
+                              <div
+                                style={{
+                                  display:
+                                    isListUpdate && list.key === listId
+                                      ? 'none'
+                                      : 'block',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {list.props.list.name}
+                                <span className="lIcon">
+                                  <IconButton
+                                    className="icon"
+                                    onClick={() => this.deleteList(list)}
+                                  >
+                                    <CloseIcon />
+                                  </IconButton>
+                                </span>
+                              </div>
                             </div>
+                            {isListUpdate && list.key === listId ? (
+                              <Form
+                                onSubmit={e => this.updateList(e, name, listId)}
+                              >
+                                <FormGroup>
+                                  <Input
+                                    type="text"
+                                    name="name"
+                                    placeholder={name}
+                                    onChange={this.handleChange}
+                                    value={name}
+                                  />
+                                </FormGroup>
+                                <div type="submit" />
+                              </Form>
+                            ) : null}
+                            <Card
+                              listId={list.props.list.id}
+                              onRef={ref => {
+                                this.drag = ref;
+                              }}
+                            />
+                            {provided.placeholder}
                           </div>
-                          {isListUpdate && list.key === listId ? (
-                            <Form
-                              onSubmit={e => this.updateList(e, name, listId)}
-                            >
-                              <FormGroup>
-                                <Input
-                                  type="text"
-                                  name="name"
-                                  placeholder={name}
-                                  onChange={this.handleChange}
-                                  value={name}
-                                />
-                              </FormGroup>
-                              <div type="submit" />
-                            </Form>
-                          ) : null}
-                          <Card listId={list.props.list.id} />
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  ))
-              )}
-              {provided.placeholder}
+                        )}
+                      </Droppable>
+                    ))
+                )}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+          <div className="newList">
+            <div
+              style={{
+                display: isListCreate ? 'none' : 'block',
+                cursor: 'pointer'
+              }}
+              className="createList"
+              onClick={() => this.handleCreateList()}
+            >
+              <div>+ Add another List</div>
             </div>
-          )}
-        </Droppable>
-        <div className="newList">
-          <div
-            style={{
-              display: isListCreate ? 'none' : 'block',
-              cursor: 'pointer'
-            }}
-            className="createList"
-            onClick={() => this.handleCreateList()}
-          >
-            <div>+ Add another List</div>
+            {isListCreate && (
+              <Form>
+                <FormGroup>
+                  <Input
+                    type="text"
+                    name="name"
+                    placeholder="Enter title for this List"
+                    onChange={this.handleChange}
+                    value={name}
+                  />
+                </FormGroup>
+                <Button
+                  size="sm"
+                  color="success"
+                  onClick={() => this.createList(name)}
+                >
+                  Add List
+                </Button>
+                <span>
+                  <IconButton onClick={() => this.handleCreateList()}>
+                    <CloseIcon />
+                  </IconButton>
+                </span>
+              </Form>
+            )}
           </div>
-          {isListCreate && (
-            <Form>
-              <FormGroup>
-                <Input
-                  type="text"
-                  name="name"
-                  placeholder="Enter title for this List"
-                  onChange={this.handleChange}
-                  value={name}
-                />
-              </FormGroup>
-              <Button
-                size="sm"
-                color="success"
-                onClick={() => this.createList(name)}
-              >
-                Add List
-              </Button>
-              <span>
-                <IconButton onClick={() => this.handleCreateList()}>
-                  <CloseIcon />
-                </IconButton>
-              </span>
-            </Form>
-          )}
         </div>
-      </div>
+      </DragDropContext>
     );
   }
 }

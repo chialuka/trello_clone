@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { fab } from '@fortawesome/free-brands-svg-icons';
@@ -13,23 +12,8 @@ import {
 import List from './list';
 
 class App extends Component {
-  state = {
-    dragging: undefined,
-    dragInfo: []
-  };
-
-  onDragEnd = result => {
-    const { dragInfo } = this.state;
-    this.setState({ dragInfo: [] });
-    console.log(result);
-    if (result.destination) {
-      dragInfo.push(result)
-      this.setState({ dragInfo });
-    }
-  };
 
   render() {
-    const { dragInfo } = this.state;
     return (
       <div>
         <div className="topIcons">
@@ -56,9 +40,7 @@ class App extends Component {
             <FontAwesomeIcon icon="bell" size="lg" />
           </span>
         </div>
-        <DragDropContext onDragEnd={this.onDragEnd}>
-          <List dragInfo={dragInfo} />
-        </DragDropContext>
+          <List />
       </div>
     );
   }
