@@ -44,7 +44,7 @@ const deleteDescriptionMutation = gql`
 class Description extends Component {
   state = {
     description: "",
-    descriptionId: ""
+    descriptionId: "",
   };
 
   handleChange = ({ target: { name, value } }) => {
