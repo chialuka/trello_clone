@@ -93,11 +93,21 @@ class Card extends React.Component {
     smallModal: false,
     bigModal: false,
     isCardCreate: false,
-    noCard: false
+    noCard: false,
+    cards: [],
   };
 
   componentDidMount() {
     this.props.onRef(this);
+  }
+
+  componentDidUpdate(prevProps) {
+    const { cards } = this.state;
+    if (prevProps.data.cards !== this.props.data.cards) {
+      cards.splice(0, 1, this.props.data.cards);
+      this.setState({ cards });
+      return this.props.getCards(cards);
+    }
   }
 
   componentWillUnmount() {
@@ -132,6 +142,7 @@ class Card extends React.Component {
   };
 
   createCard = async (title, listId) => {
+    const { cards } = this.state;
     if (!title || !listId) return null;
     await this.props.createCard({
       variables: {
@@ -141,11 +152,11 @@ class Card extends React.Component {
       update: (store, { data: { createCard } }) => {
         const data = store.readQuery({ query: CardsQuery });
         data.cards.push(createCard);
-        this.setState({ title: '', isCardCreate: false, newCard: true });
+        cards.splice(0, 1, data);
+        this.setState({ title: '', isCardCreate: false, newCard: true, cards });
         store.writeQuery({ query: CardsQuery, data });
       }
     });
-    window.location.reload();
   };
 
   updateCard = async (cardId, listId, title) => {

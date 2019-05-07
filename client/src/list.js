@@ -70,25 +70,29 @@ class List extends Component {
     listId: '',
     isListCreate: null,
     isListUpdate: null,
-    newCard: ''
+    cards: [],
   };
 
   drag = React.createRef();
 
+  getCards = (cards) => {
+    this.setState({ cards });
+    const cardArr = cards;
+    return cardArr;
+  }
+
   onDragEnd = result => {
-    const lists = this.props.data.lists;
     const {
       draggableId,
       destination,
       source: { droppableId }
     } = result;
-    if (destination.droppableId === droppableId || destination === null) {
+    if (destination === null || destination.droppableId === droppableId) {
       return null;
     }
-    const list = lists
-      .map(list => list.card)
-      .find(list => list.find(card => card.id === draggableId));
-    const card = list.find(card => card.id === draggableId);
+    const { cards } = this.state;
+    const cardArray =  Array.isArray(cards[0]) ? cards[0] : cards[0].cards;
+    const card = cardArray.find(card => card.id === draggableId);
     if (result.destination) {
       this.drag.updateCard(draggableId, destination.droppableId, card.title);
     }
@@ -229,6 +233,7 @@ class List extends Component {
                               onRef={ref => {
                                 this.drag = ref;
                               }}
+                              getCards={this.getCards}
                             />
                             {provided.placeholder}
                           </div>

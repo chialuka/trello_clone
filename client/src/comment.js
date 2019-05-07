@@ -44,7 +44,7 @@ const deleteCommentMutation = gql`
 class Comment extends Component {
   state = {
     comment: "",
-    commentId: ""
+    commentId: "",
   };
 
   handleChange = ({ target: { name, value } }) => {
