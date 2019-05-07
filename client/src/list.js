@@ -70,36 +70,10 @@ class List extends Component {
     listId: '',
     isListCreate: null,
     isListUpdate: null,
-    newCard: '',
-    listArray: []
+    newCard: ''
   };
 
   drag = React.createRef();
-
-  componentDidMount() {
-    if (!this.props.data.loading) {
-      const lists = this.props.data.lists;
-      const { listArray } = this.state;
-      if (listArray.length) {
-        listArray.pop();
-      }
-      listArray.push(lists);
-      this.setState({ listArray });
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    const { listArray } = this.state;
-    if (this.props.data.lists !== prevProps.data.lists) {
-      console.log(this.props.data.lists, 'new props');
-      console.log(prevProps.data.lists, 'prev props');
-      if (listArray.length) {
-        listArray.pop();
-      }
-      listArray.push(this.props.data.lists)
-      this.setState({ listArray });
-    }
-  }
 
   onDragEnd = result => {
     const lists = this.props.data.lists;
@@ -111,12 +85,13 @@ class List extends Component {
     if (destination.droppableId === droppableId || destination === null) {
       return null;
     }
-    const list = lists.find(x => x.id === droppableId);
-    const card = list.card.find(y => y.id === draggableId);
+    const list = lists
+      .map(list => list.card)
+      .find(list => list.find(card => card.id === draggableId));
+    const card = list.find(card => card.id === draggableId);
     if (result.destination) {
       this.drag.updateCard(draggableId, destination.droppableId, card.title);
     }
-    window.location.reload();
   };
 
   handleChange = ({ target: { name, value } }) => {
@@ -181,11 +156,8 @@ class List extends Component {
     const {
       data: { loading, error, lists }
     } = this.props;
-    const { name, listId, isListCreate, isListUpdate, listArray } = this.state;
-    const listToMap = listArray[0] || lists;
-    console.log(listArray[0], 'list array');
-    console.log(listToMap, 'list to map');
-    if (loading || error || !listArray) return null;
+    const { name, listId, isListCreate, isListUpdate } = this.state;
+    if (loading || error) return null;
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="board">
@@ -196,7 +168,7 @@ class List extends Component {
                 {...provided.droppableProps}
                 className="singleBoard"
               >
-                {listToMap.map(
+                {lists.map(
                   (list, index) =>
                     (list = (
                       <Droppable

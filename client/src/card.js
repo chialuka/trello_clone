@@ -145,6 +145,7 @@ class Card extends React.Component {
         store.writeQuery({ query: CardsQuery, data });
       }
     });
+    window.location.reload();
   };
 
   updateCard = async (cardId, listId, title) => {

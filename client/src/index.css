@@ -22,6 +22,7 @@ body {
   padding: 13px 0px 7px 0px;
   overflow: hidden;
   position: fixed;
+  width: 100%;
 }
 
 .topIcons span {
@@ -99,7 +100,7 @@ body {
   min-height: 32px;
   padding: 10px;
   line-height: 19px;
-  margin-left: 15%;
+  margin-left: 25%;
 }
 
 .topPlusIcon {
