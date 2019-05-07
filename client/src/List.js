@@ -91,8 +91,7 @@ class List extends Component {
       return null;
     }
     const { cards } = this.state;
-    const cardArray =  Array.isArray(cards[0]) ? cards[0] : cards[0].cards;
-    const card = cardArray.find(card => card.id === draggableId);
+    const card = cards[0].find(card => card.id === draggableId);
     if (result.destination) {
       this.drag.updateCard(draggableId, destination.droppableId, card.title);
     }
@@ -228,6 +227,7 @@ class List extends Component {
                                 <div type="submit" />
                               </Form>
                             ) : null}
+                            {provided.placeholder}
                             <Card
                               listId={list.props.list.id}
                               onRef={ref => {
@@ -235,7 +235,6 @@ class List extends Component {
                               }}
                               getCards={this.getCards}
                             />
-                            {provided.placeholder}
                           </div>
                         )}
                       </Droppable>
@@ -254,7 +253,9 @@ class List extends Component {
               className="createList"
               onClick={() => this.handleCreateList()}
             >
-              <div>+ Add another List</div>
+              {lists.length ?(
+                <div>+ Add another list</div>
+              ) : <div> + Add new list </div>}
             </div>
             {isListCreate && (
               <Form>

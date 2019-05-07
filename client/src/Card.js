@@ -94,7 +94,7 @@ class Card extends React.Component {
     bigModal: false,
     isCardCreate: false,
     noCard: false,
-    cards: [],
+    cards: []
   };
 
   componentDidMount() {
@@ -142,7 +142,6 @@ class Card extends React.Component {
   };
 
   createCard = async (title, listId) => {
-    const { cards } = this.state;
     if (!title || !listId) return null;
     await this.props.createCard({
       variables: {
@@ -152,8 +151,7 @@ class Card extends React.Component {
       update: (store, { data: { createCard } }) => {
         const data = store.readQuery({ query: CardsQuery });
         data.cards.push(createCard);
-        cards.splice(0, 1, data);
-        this.setState({ title: '', isCardCreate: false, newCard: true, cards });
+        this.setState({ title: '', isCardCreate: false, newCard: true });
         store.writeQuery({ query: CardsQuery, data });
       }
     });
@@ -162,11 +160,6 @@ class Card extends React.Component {
   updateCard = async (cardId, listId, title) => {
     if (!cardId || !listId || !title) return null;
     await this.props.updateCard({
-      variables: {
-        id: cardId,
-        listId: listId,
-        title: title
-      },
       update: store => {
         const data = store.readQuery({ query: CardsQuery });
         data.cards.map(
@@ -181,7 +174,12 @@ class Card extends React.Component {
               : card
         );
         store.writeQuery({ query: CardsQuery, data });
-      }
+      },
+      variables: {
+        id: cardId,
+        listId: listId,
+        title: title
+      },
     });
     this.setState({ smallModal: false });
   };
@@ -204,8 +202,7 @@ class Card extends React.Component {
       data: { loading, error, cards },
       listId
     } = this.props;
-    const { title, cardId, isCardCreate, noCard } = this.state;
-
+    const { title, cardId, isCardCreate } = this.state;
     if (loading || error) return null;
     return (
       <div>
@@ -333,7 +330,11 @@ class Card extends React.Component {
               cursor: 'pointer'
             }}
           >
-            {!noCard ? <div>+ Add another card</div> : <div>+Add a card</div>}
+            {cards.some(x => x.listId === listId) ? (
+              <div>+ Add another card</div>
+            ) : (
+              <div>+ Add a card</div>
+            )}
           </div>
           {isCardCreate && (
             <Form>

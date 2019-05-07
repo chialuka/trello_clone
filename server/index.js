@@ -127,6 +127,7 @@ const resolvers = {
     },
     deleteList: async (_, { id}) => {
       await List.findOneAndDelete({_id: id});
+      await Card.deleteMany({ listId: id })
       return true;
     },
 
