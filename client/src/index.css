@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: Helvetica Neue,Arial,Helvetica,sans-serif;
+  font-family: Helvetica Neue, Arial, Helvetica, sans-serif;
   font-size: 14px;
   background-color: #026aa7;
   width: 100%;
@@ -14,18 +14,25 @@ body {
   min-width: 100%;
   white-space: nowrap;
   display: flex;
+  margin-top: 45px;
+  position: absolute;
 }
 
 .topIcons {
   padding: 13px 0px 7px 0px;
   overflow: hidden;
+  position: fixed;
+}
+
+.topIcons span {
+  display: inline;
 }
 
 .topHomeIcon {
-  background-color: hsla(0,0%,100%,.3);
+  background-color: hsla(0, 0%, 100%, 0.3);
   border-radius: 3px;
   border: 5px;
-  color:#fff;
+  color: #fff;
   font-size: 15px;
   height: 32px;
   margin: 4px;
@@ -35,10 +42,10 @@ body {
 }
 
 .topTrelIcon {
-  background-color: hsla(0,0%,100%,.3);
+  background-color: hsla(0, 0%, 100%, 0.3);
   border-radius: 3px;
   border: 5px;
-  color:#fff;
+  color: #fff;
   font-size: 15px;
   height: 32px;
   margin: 4px;
@@ -48,10 +55,10 @@ body {
 }
 
 .topSearchIcon {
-  background-color: hsla(0,0%,100%,.3);
+  background-color: hsla(0, 0%, 100%, 0.3);
   border-radius: 3px;
   border: 5px;
-  color:#fff;
+  color: #fff;
   font-size: 15px;
   height: 32px;
   margin: 4px;
@@ -65,61 +72,46 @@ body {
 }
 
 .topTitleIcon {
-  background-color: hsla(0,0%,100%,.02);
+  background-color: hsla(0, 0%, 100%, 0.02);
   border-radius: 3px;
   border: 5px;
-  color:rgb(221, 215, 215);
+  color: rgb(221, 215, 215);
   font-weight: bold;
   font-family: cursive;
   font-style: italic;
   font-size: 15px;
   height: 32px;
   align-items: center;
-  min-height: 32px;
   margin-left: 25%;
-  margin-right: -50%;
   padding: 10px;
   line-height: 19px;
+}
+
+.topPlusIcon,
+.topInfoIcon,
+.topBellIcon {
+  background-color: hsla(0, 0%, 100%, 0.3);
+  border-radius: 3px;
+  border: 5px;
+  color: #fff;
+  font-size: 15px;
+  height: 32px;
+  min-height: 32px;
+  padding: 10px;
+  line-height: 19px;
+  margin-left: 15%;
 }
 
 .topPlusIcon {
-  background-color: hsla(0,0%,100%,.3);
-  border-radius: 3px;
-  border: 5px;
-  color:#fff;
-  font-size: 15px;
-  height: 32px;
   margin-right: -5%;
-  margin-left: 80%;
-  min-height: 32px;
-  padding: 10px;
-  line-height: 19px;
 }
 
 .topInfoIcon {
-  background-color: hsla(0,0%,100%,.3);
-  border-radius: 3px;
-  border: 5px;
-  color:#fff;
-  font-size: 15px;
-  height: 32px;
   margin-left: 5.3%;
-  min-height: 32px;
-  padding: 10px;
-  line-height: 19px;
 }
 
 .topBellIcon {
-  background-color: hsla(0,0%,100%,.3);
-  border-radius: 3px;
-  border: 5px;
-  color:#fff;
-  font-size: 15px;
-  height: 32px;
   margin-left: 0.2%;
-  min-height: 32px;
-  padding: 10px;
-  line-height: 19px;
 }
 
 .singleBoard {
@@ -133,7 +125,7 @@ body {
   box-sizing: border-box;
   background-color: #dfe3e6;
   flex: 1 100%;
-  box-shadow: 1px 1px 0 rgba(9,45,66,.5);
+  box-shadow: 1px 1px 0 rgba(9, 45, 66, 0.5);
   border-radius: 4px;
   min-width: 300px;
   margin: 5px;
@@ -148,7 +140,7 @@ body {
 
 .item {
   padding: 1px;
-  box-shadow: 0 1px 0 rgba(9,45,66,.25);
+  box-shadow: 0 1px 0 rgba(9, 45, 66, 0.25);
   overflow: hidden;
   margin: 8px 0px 8px 0px;
   cursor: pointer;
@@ -167,7 +159,7 @@ body {
 }
 
 .detailsBox {
-  background-color:#ebeef0;
+  background-color: #ebeef0;
 }
 
 .description {
@@ -234,8 +226,8 @@ body {
   opacity: 1;
 }
 
-.icon{
- transform: scale(0.6);
+.icon {
+  transform: scale(0.6);
 }
 
 .cardTitle {
@@ -246,16 +238,16 @@ body {
 
 .createCard {
   padding: 10px 0px 0px 8px;
-  color: rgba(61, 66, 66, 0.7)
+  color: rgba(61, 66, 66, 0.7);
 }
 
 .createList {
   color: rgb(243, 235, 235);
-  background-color: rgba(0,0,0,.12);
+  background-color: rgba(0, 0, 0, 0.12);
   padding: 10px;
   margin: 10px;
   box-sizing: border-box;
-  box-shadow: 1px 1px 0 rgba(9,45,66,.5);
+  box-shadow: 1px 1px 0 rgba(9, 45, 66, 0.5);
   border-radius: 4px;
 }
 

@@ -6,7 +6,7 @@ import { Form, FormGroup, Input, Button } from 'reactstrap';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import UUID from 'uuid/v4';
-import Card from './card';
+import Card from './Card';
 
 const ListsQuery = gql`
   {
@@ -70,19 +70,45 @@ class List extends Component {
     listId: '',
     isListCreate: null,
     isListUpdate: null,
-    newCard: ''
+    newCard: '',
+    listArray: []
   };
 
   drag = React.createRef();
+
+  componentDidMount() {
+    if (!this.props.data.loading) {
+      const lists = this.props.data.lists;
+      const { listArray } = this.state;
+      if (listArray.length) {
+        listArray.pop();
+      }
+      listArray.push(lists);
+      this.setState({ listArray });
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const { listArray } = this.state;
+    if (this.props.data.lists !== prevProps.data.lists) {
+      console.log(this.props.data.lists, 'new props');
+      console.log(prevProps.data.lists, 'prev props');
+      if (listArray.length) {
+        listArray.pop();
+      }
+      listArray.push(this.props.data.lists)
+      this.setState({ listArray });
+    }
+  }
 
   onDragEnd = result => {
     const lists = this.props.data.lists;
     const {
       draggableId,
       destination,
-      source: { droppableId },
+      source: { droppableId }
     } = result;
-    if (destination.droppableId === droppableId) {
+    if (destination.droppableId === droppableId || destination === null) {
       return null;
     }
     const list = lists.find(x => x.id === droppableId);
@@ -90,6 +116,7 @@ class List extends Component {
     if (result.destination) {
       this.drag.updateCard(draggableId, destination.droppableId, card.title);
     }
+    window.location.reload();
   };
 
   handleChange = ({ target: { name, value } }) => {
@@ -150,16 +177,17 @@ class List extends Component {
     });
   };
 
-
   render() {
     const {
       data: { loading, error, lists }
     } = this.props;
-    const { name, listId, isListCreate, isListUpdate } = this.state;
-
-    if (loading || error) return null;
+    const { name, listId, isListCreate, isListUpdate, listArray } = this.state;
+    const listToMap = listArray[0] || lists;
+    console.log(listArray[0], 'list array');
+    console.log(listToMap, 'list to map');
+    if (loading || error || !listArray) return null;
     return (
-        <DragDropContext onDragEnd={this.onDragEnd}>
+      <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="board">
           <Droppable droppableId={UUID()}>
             {provided => (
@@ -168,7 +196,7 @@ class List extends Component {
                 {...provided.droppableProps}
                 className="singleBoard"
               >
-                {lists.map(
+                {listToMap.map(
                   (list, index) =>
                     (list = (
                       <Droppable

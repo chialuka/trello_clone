@@ -16,8 +16,8 @@ import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import Description from './description';
-import Comment from './comment';
+import Description from './Description';
+import Comment from './Comment';
 import UUID from 'uuid/v4';
 
 const CardsQuery = gql`
@@ -154,6 +154,21 @@ class Card extends React.Component {
         id: cardId,
         listId: listId,
         title: title
+      },
+      update: store => {
+        const data = store.readQuery({ query: CardsQuery });
+        data.cards.map(
+          card =>
+            card.id === cardId
+              ? {
+                  ...card,
+                  cardId,
+                  listId,
+                  title
+                }
+              : card
+        );
+        store.writeQuery({ query: CardsQuery, data });
       }
     });
     this.setState({ smallModal: false });
@@ -170,10 +185,6 @@ class Card extends React.Component {
         store.writeQuery({ query: CardsQuery, data });
       }
     });
-  };
-
-  getCard = () => {
-    this.setState({ noCard: true });
   };
 
   render() {
