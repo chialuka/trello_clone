@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/LukasChiama/trello_clone#readme",
   "dependencies": {
-    "concurrently": "^4.1.0"
+    "concurrently": "^7.3.0"
   }
 }
